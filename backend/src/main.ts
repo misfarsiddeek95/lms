@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AllExceptionsFilter } from './common/util/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -38,6 +40,19 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('Online Learning API')
+    .setDescription('API for managing students, courses, and enrollments')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('lms')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory);
+
+  app.useGlobalFilters(new AllExceptionsFilter());
+
   const port = process.env.PORT || 3000;
   await app.listen(port);
   Logger.log(

@@ -10,7 +10,7 @@ async function main() {
       firstName: 'Misfar',
       lastName: 'Siddeek',
       email: 'asmmisfar@gmail.com',
-      password: '$2b$10$6RSCLIaJ9bzeIDPMZMMSeeNPJShdUkA2RGrqoQi8gG2BrkSeZNNfG',
+      password: '$2b$10$WkIMrR/6v1R/XivNIz98fOLfIAZIIjDD2lCjIRQz77zkN.B.U.4oe', // michurippu
       role: 'ADMIN',
     },
     update: {
@@ -29,7 +29,7 @@ async function main() {
       firstName: 'David',
       lastName: 'Bombal',
       email: 'student@gmail.com',
-      password: '$2b$10$6RSCLIaJ9bzeIDPMZMMSeeNPJShdUkA2RGrqoQi8gG2BrkSeZNNfG',
+      password: '$2b$10$WkIMrR/6v1R/XivNIz98fOLfIAZIIjDD2lCjIRQz77zkN.B.U.4oe', // michurippu
       role: 'STUDENT',
     },
     update: {

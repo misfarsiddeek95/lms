@@ -22,11 +22,6 @@ import { Role } from '@prisma/client';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  async getAllUser() {
-    return this.userService.getAllUsers();
-  }
-
   @Post('register')
   async register(
     @Body()
