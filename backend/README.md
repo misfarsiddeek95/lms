@@ -28,7 +28,7 @@
 ## Project setup
 
 ```bash
-$ git clone https://github.com/misfarsiddeek95/task_management_be.git
+$ git clone https://github.com/misfarsiddeek95/lms.git
 $ yarn install
 ```
 
