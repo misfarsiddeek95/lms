@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -86,8 +87,14 @@ export class UserService {
     }
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: string, user: any) {
     try {
+      if (user?.id === +id) {
+        throw new ForbiddenException(
+          'You are not allowed to delete your own account',
+        );
+      }
+
       const checkUserExists = await this.prisma.user.findUnique({
         where: {
           id: +id,
