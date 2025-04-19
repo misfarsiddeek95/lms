@@ -22,9 +22,9 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
-  @Post('create-course')
-  create(@Body() createCourseDto: CreateCourseDto) {
-    return this.coursesService.create(createCourseDto);
+  @Post('create-or-update-course')
+  create(@Body() data: UpdateCourseDto) {
+    return this.coursesService.createOrUpdate(data);
   }
 
   @Get()
@@ -32,17 +32,7 @@ export class CoursesController {
     return this.coursesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.coursesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
-    return this.coursesService.update(+id, updateCourseDto);
-  }
-
-  @Delete(':id')
+  @Delete('delete-course/:id')
   remove(@Param('id') id: string) {
     return this.coursesService.remove(+id);
   }

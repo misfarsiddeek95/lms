@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsIn, IsNotEmpty, IsString } from 'class-validator';
 import { Role } from '@prisma/client'; // Import the Role enum from Prisma
 
 export class CreateUserDto {
@@ -24,4 +24,7 @@ export class CreateUserDto {
     message: 'Role must be either "ADMIN" or "EMPLOYEE"',
   })
   role: Role;
+
+  @IsBoolean()
+  isActive?: boolean;
 }

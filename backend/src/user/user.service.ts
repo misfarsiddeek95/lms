@@ -36,6 +36,7 @@ export class UserService {
           role: data.role || Role.STUDENT,
           password: hashedPassword,
           email: data.email,
+          isActive: data.isActive || true,
         },
       });
 
@@ -78,6 +79,7 @@ export class UserService {
           lastName: data.lastName,
           role: data.role || Role.STUDENT,
           email: data.email,
+          isActive: data.isActive,
         },
       });
       const { password, ...result } = updatedUser;
