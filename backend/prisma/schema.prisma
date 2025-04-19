@@ -25,6 +25,7 @@ model User {
   role        Role         @default(STUDENT) // Added role for access control
   firstName   String       @map("first_name")
   lastName    String       @map("last_name")
+  isActive    Boolean      @default(true) @map("is_active")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
   enrollments Enrollment[]
@@ -36,6 +37,9 @@ model Course {
   id          Int          @id @default(autoincrement())
   name        String
   description String
+  duration    String
+  price       String
+  isPublished Boolean      @default(false) @map("is_published")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
   enrollments Enrollment[]

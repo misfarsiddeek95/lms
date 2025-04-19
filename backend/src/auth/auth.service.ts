@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -12,15 +12,25 @@ export class AuthService {
   ) {}
 
   async validateUser(loginDto: LoginDto): Promise<any> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: loginDto.email },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email: loginDto.email },
+      });
 
-    if (user && (await bcrypt.compare(loginDto.password, user.password))) {
-      const { password, ...result } = user;
-      return result;
+      if (!user?.isActive) {
+        throw new ForbiddenException(
+          'Your account is inactive. Please contact support.',
+        );
+      }
+
+      if (user && (await bcrypt.compare(loginDto.password, user.password))) {
+        const { password, ...result } = user;
+        return result;
+      }
+      return null;
+    } catch (error) {
+      throw error;
     }
-    return null;
   }
 
   async login(user: any) {
