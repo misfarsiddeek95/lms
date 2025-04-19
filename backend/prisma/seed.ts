@@ -4,45 +4,39 @@ const prisma = new PrismaClient();
 async function main() {
   const upsert = await prisma.user.upsert({
     where: {
-      userName: 'misfar',
+      email: 'asmmisfar@gmail.com',
     },
     create: {
       firstName: 'Misfar',
-      empId: 'EMP00001',
       lastName: 'Siddeek',
-      userName: 'misfar',
+      email: 'asmmisfar@gmail.com',
       password: '$2b$10$6RSCLIaJ9bzeIDPMZMMSeeNPJShdUkA2RGrqoQi8gG2BrkSeZNNfG',
-      department: 'MGT',
       role: 'ADMIN',
     },
     update: {
       firstName: 'Misfar',
       lastName: 'Siddeek',
-      userName: 'misfar',
-      department: 'MGT',
+      email: 'asmmisfar@gmail.com',
       role: 'ADMIN',
     },
   });
 
   const upsert2 = await prisma.user.upsert({
     where: {
-      userName: 'david',
+      email: 'student@gmail.com',
     },
     create: {
-      empId: 'EMP00002',
       firstName: 'David',
       lastName: 'Bombal',
-      userName: 'david',
+      email: 'student@gmail.com',
       password: '$2b$10$6RSCLIaJ9bzeIDPMZMMSeeNPJShdUkA2RGrqoQi8gG2BrkSeZNNfG',
-      department: 'DEV',
-      role: 'EMPLOYEE',
+      role: 'STUDENT',
     },
     update: {
       firstName: 'David',
       lastName: 'Bombal',
-      userName: 'Bombal',
-      department: 'DEV',
-      role: 'EMPLOYEE',
+      email: 'student@gmail.com',
+      role: 'STUDENT',
     },
   });
 

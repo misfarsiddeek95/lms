@@ -13,48 +13,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
 enum Role {
   ADMIN
   STUDENT
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  empId      String?  @unique @map("emp_id")
-  firstName  String   @map("first_name")
-  lastName   String   @map("last_name")
-  userName   String   @unique @map("username")
-  password   String
-  department String?
-  role       Role     @default(STUDENT) // "admin" or "STUDENT"
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  role        Role         @default(STUDENT) // Added role for access control
+  firstName   String       @map("first_name")
+  lastName    String       @map("last_name")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  enrollments Enrollment[]
 
-  tasks        Task[]
-
-  @@index([userName])
   @@map("user")
 }
 
-model Task {
-  id              Int            @id @default(autoincrement())
-  userId          Int
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  taskName        String         @map("task_name")
-  taskDescription String?        @map("task_description") @db.Text
-  taskPriority    Priority       @map("task_priority")
-  dueDate         DateTime       @map("due_date")
-  isCompleted     Boolean        @default(false) @map("is_completed")
+model Course {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  enrollments Enrollment[]
 
-  @@index([userId])
-  @@index([taskPriority])
-  @@map("task")
+  @@map("course")
+}
+
+model Enrollment {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  courseId   Int      @map("course_id")
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+  user       User     @relation(fields: [userId], references: [id])
+  course     Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("enrollment")
 }
 
 model Token {
