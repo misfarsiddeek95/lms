@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -133,6 +134,37 @@ export class EnrollmentService {
         conflicts: [],
         enrolled: newEnrollments,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async removeEntollment(enrollmentId: number, loggedUser: any) {
+    try {
+      const enrollment = await this.prisma.enrollment.findUnique({
+        where: { id: enrollmentId },
+        select: {
+          userId: true,
+        },
+      });
+
+      if (!enrollment) {
+        throw new NotFoundException(
+          `Enrollment with ID ${enrollmentId} not found`,
+        );
+      }
+
+      if (
+        loggedUser?.role !== 'ADMIN' &&
+        loggedUser?.id !== enrollment?.userId
+      ) {
+        throw new BadRequestException(
+          'You cannot delete the enrollment of another student',
+        );
+      }
+
+      await this.prisma.enrollment.delete({ where: { id: enrollmentId } });
+      return { message: 'Enrollment deleted successfully' };
     } catch (error) {
       throw error;
     }

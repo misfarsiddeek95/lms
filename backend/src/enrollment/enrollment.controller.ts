@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { Enrollment, Role } from '@prisma/client';
@@ -20,5 +28,11 @@ export class EnrollmentController {
     @Req() request: Request,
   ) {
     return this.enrollmentService.createEnrollments(data, request?.user);
+  }
+
+  @Roles(Role.ADMIN, Role.STUDENT)
+  @Delete('remove-enrollment/:id')
+  async removeEnrollment(@Param('id') id: number, @Req() request: Request) {
+    return this.enrollmentService.removeEntollment(+id, request?.user);
   }
 }
