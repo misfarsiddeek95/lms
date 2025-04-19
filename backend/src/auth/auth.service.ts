@@ -17,6 +17,10 @@ export class AuthService {
         where: { email: loginDto.email },
       });
 
+      if (!user) {
+        return null;
+      }
+
       if (!user?.isActive) {
         throw new ForbiddenException(
           'Your account is inactive. Please contact support.',

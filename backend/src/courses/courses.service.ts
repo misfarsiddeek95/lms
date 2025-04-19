@@ -36,10 +36,6 @@ export class CoursesService {
     }
   }
 
-  findAll() {
-    return `This action returns all courses`;
-  }
-
   async remove(id: number) {
     try {
       const checkExists = await this.prisma.course.findUnique({

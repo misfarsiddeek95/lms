@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -36,7 +37,7 @@ export class EnrollmentService {
       }
 
       if (loggedUser?.role === 'STUDENT' && userId !== loggedUser?.id) {
-        throw new BadRequestException(
+        throw new ForbiddenException(
           'You cannot assign course to an another student',
         );
       }
@@ -158,7 +159,7 @@ export class EnrollmentService {
         loggedUser?.role !== 'ADMIN' &&
         loggedUser?.id !== enrollment?.userId
       ) {
-        throw new BadRequestException(
+        throw new ForbiddenException(
           'You cannot delete the enrollment of another student',
         );
       }

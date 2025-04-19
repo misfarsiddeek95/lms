@@ -46,7 +46,7 @@ async function bootstrap() {
     .setDescription('API for managing students, courses, and enrollments')
     .setVersion('1.0')
     .addBearerAuth()
-    .addTag('lms')
+    .addTag('LEARNING MANAGEMENT SYSTEM - API DOCUMENTATION')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
