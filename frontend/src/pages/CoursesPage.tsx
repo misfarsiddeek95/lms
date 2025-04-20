@@ -15,8 +15,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store";
 import { fetchCourses, selectAllCourses } from "../store/slices/course.slice";
 import LinearWithValueLabel from "../components/LinearWithValueLabel";
-import SearchIcon from "@mui/icons-material/Search";
 import useDebounce from "../hooks/useDebounce";
+import { COURSES_LIST_COUNT } from "../constants";
+
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 
 interface Course {
   id: number;
@@ -46,7 +49,9 @@ const CoursesPage = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchCourses({ search: debouncedSearch, page, limit: 6 }));
+    dispatch(
+      fetchCourses({ search: debouncedSearch, page, limit: COURSES_LIST_COUNT })
+    );
   }, [debouncedSearch, page, dispatch]);
 
   return (
@@ -62,11 +67,21 @@ const CoursesPage = () => {
         <OutlinedInput
           id="outlined-adornment-search"
           type={"text"}
+          value={searchTerm}
           endAdornment={
             <InputAdornment position="end">
-              <IconButton edge="end">
-                <SearchIcon />
-              </IconButton>
+              <SearchIcon />
+              {/* Clear icon */}
+              {searchTerm && (
+                <IconButton
+                  onClick={() => {
+                    setSearchTerm(""); // Clear the search input
+                    setPage(1); // Optionally reset page when clearing search
+                  }}
+                >
+                  <ClearIcon />
+                </IconButton>
+              )}
             </InputAdornment>
           }
           label="Search Course"

@@ -6,6 +6,7 @@ import {
 } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import axios from "axios";
+import { COURSES_LIST_COUNT } from "../../constants";
 
 export const COURSE_FEATURE_KEY = "courses";
 
@@ -46,13 +47,16 @@ const initialState: CourseState = {
 export const fetchCourses = createAsyncThunk<
   CourseResponse,
   { page?: number; limit?: number; search?: string }
->("courses/fetchCourses", async ({ page = 1, limit = 10, search = "" }) => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}courses/fetch-all-courses`,
-    { params: { page, limit, search } }
-  );
-  return response.data;
-});
+>(
+  "courses/fetchCourses",
+  async ({ page = 1, limit = COURSES_LIST_COUNT, search = "" }) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}courses/fetch-all-courses`,
+      { params: { page, limit, search } }
+    );
+    return response.data;
+  }
+);
 
 const courseSlice = createSlice({
   name: COURSE_FEATURE_KEY,
