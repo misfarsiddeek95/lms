@@ -1,23 +1,32 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup";
 import {
-  TextField,
   Button,
-  Box,
-  Typography,
   CircularProgress,
-  Paper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch } from "../store";
-import { createUser, selectUserError } from "../store/slices/user.slice";
-import { useNavigate } from "react-router";
-import { RegisterFormData } from "../types";
+import { AppDispatch } from "../../store";
+import { createUser, selectUserError } from "../../store/slices/user.slice";
+import * as Yup from "yup";
+import { RegisterFormData } from "../../types";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 
-const RegisterPage = () => {
-  const navigate = useNavigate();
+interface StudentFormProps {
+  open: boolean;
+  fullscreen: boolean;
+  handleClose: () => void;
+}
+
+const StudentFormModal = ({
+  open,
+  fullscreen,
+  handleClose,
+}: StudentFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const error = useSelector(selectUserError);
 
@@ -49,7 +58,10 @@ const RegisterPage = () => {
       await dispatch(
         createUser({ ...data, role: "STUDENT", isActive: true })
       ).unwrap();
-      navigate("/login");
+
+      if (handleClose) {
+        handleClose(); // This will close the modal
+      }
     } catch (error) {
       const errorMessage =
         typeof error === "string" ? error : "Something went wrong";
@@ -71,36 +83,21 @@ const RegisterPage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#f5f7fa",
-        px: 2,
+    <Dialog
+      fullScreen={fullscreen}
+      open={open}
+      onClose={(event, reason) => {
+        if (reason !== "backdropClick") {
+          handleClose();
+        }
       }}
+      aria-labelledby="responsive-dialog-title"
+      disableEscapeKeyDown
     >
-      <Paper
-        elevation={4}
-        sx={{
-          p: 4,
-          borderRadius: 3,
-          maxWidth: 450,
-          width: "100%",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-        }}
-      >
-        <Typography variant="h4" align="center" fontWeight={600} gutterBottom>
-          Register
-        </Typography>
-        <Typography
-          variant="body1"
-          align="center"
-          sx={{ mb: 3, color: "#666" }}
-        >
-          Create your student account below
-        </Typography>
+      <DialogTitle id="responsive-dialog-title">
+        {"Register Student"}
+      </DialogTitle>
+      <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             label="First Name"
@@ -156,8 +153,9 @@ const RegisterPage = () => {
             type="submit"
             fullWidth
             variant="contained"
+            size="small"
             sx={{
-              mt: 3,
+              my: 3,
               py: 1.5,
               fontSize: "1rem",
               fontWeight: "bold",
@@ -172,10 +170,20 @@ const RegisterPage = () => {
               "Register"
             )}
           </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            color="error"
+            onClick={handleClose}
+            size="small"
+          >
+            CLOSE
+          </Button>
         </form>
-      </Paper>
-    </Box>
+      </DialogContent>
+      <DialogActions></DialogActions>
+    </Dialog>
   );
 };
 
-export default RegisterPage;
+export default StudentFormModal;

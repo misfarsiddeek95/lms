@@ -8,6 +8,7 @@ import {
 import { RootState } from "..";
 import axios from "axios";
 import { User } from "../../types";
+import { STUDENT_LIST_COUNT } from "../../constants";
 
 export const USER_FEATURE_KEY = "users";
 
@@ -78,25 +79,29 @@ export const createUser = createAsyncThunk<
   User,
   Partial<User>,
   { rejectValue: string }
->(`${USER_FEATURE_KEY}/createUser`, async (userData, { rejectWithValue }) => {
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}user/register`,
-      userData
-    );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const message =
-        error.response?.data?.message?.message ||
-        error.response?.data?.message ||
-        "Register issue";
-      return rejectWithValue(message);
-    } else {
-      return rejectWithValue("An unknown error occurred");
+>(
+  `${USER_FEATURE_KEY}/createUser`,
+  async (userData, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}user/register`,
+        userData
+      );
+      dispatch(fetchUsers({ page: 1, pageSize: STUDENT_LIST_COUNT }));
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.message?.message ||
+          error.response?.data?.message ||
+          "Register issue";
+        return rejectWithValue(message);
+      } else {
+        return rejectWithValue("An unknown error occurred");
+      }
     }
   }
-});
+);
 
 // Slice
 const userSlice = createSlice({
