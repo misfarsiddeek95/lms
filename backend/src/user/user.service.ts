@@ -58,6 +58,21 @@ export class UserService {
     };
   }
 
+  async getUser(id: number) {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { id } });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const { password, ...result } = user;
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async register(data: CreateUserDto) {
     try {
       const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -103,27 +118,26 @@ export class UserService {
         throw new NotFoundException("Couldn't find the user for given ID");
       }
 
-      const existingUser = await this.prisma.user.findUnique({
-        where: { email: data.email },
-      });
+      if (data.email && data.email !== isUserExists.email) {
+        const existingUser = await this.prisma.user.findUnique({
+          where: { email: data.email },
+        });
 
-      if (existingUser && existingUser.id !== isUserExists.id) {
-        throw new ConflictException(
-          'Username already exists. Please try another.',
-        );
+        if (existingUser && existingUser.id !== isUserExists.id) {
+          throw new ConflictException(
+            'Email already exists. Please try another.',
+          );
+        }
       }
+
+      const { id, ...rest } = data;
+      const cleanedData = this.removeUndefinedFields(rest);
 
       const updatedUser = await this.prisma.user.update({
         where: {
-          id: data.id,
+          id,
         },
-        data: {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          role: data.role || Role.STUDENT,
-          email: data.email,
-          isActive: data.isActive,
-        },
+        data: cleanedData,
       });
       const { password, ...result } = updatedUser;
       return result;
@@ -154,5 +168,11 @@ export class UserService {
     } catch (error) {
       throw error;
     }
+  }
+
+  removeUndefinedFields<T extends object>(obj: T): Partial<T> {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([_, v]) => v !== undefined),
+    ) as Partial<T>;
   }
 }

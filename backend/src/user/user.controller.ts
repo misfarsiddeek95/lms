@@ -46,6 +46,11 @@ export class UserController {
     return this.userService.fetchStudents({ page: +page, limit: +limit });
   }
 
+  @Get('get-user/:id')
+  getUser(@Param('id') id: string) {
+    return this.userService.getUser(+id);
+  }
+
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: CreateUserDto })

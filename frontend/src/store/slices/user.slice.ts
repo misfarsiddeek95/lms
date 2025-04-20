@@ -4,6 +4,7 @@ import {
   PayloadAction,
   createAsyncThunk,
   createSelector,
+  createAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import axios from "axios";
@@ -24,6 +25,9 @@ interface UserState {
   total: number;
   page: number;
   totalPages: number;
+  studentDetail: User | null;
+  isModalOpen: boolean;
+  isEdit: boolean;
 }
 
 // Initial state
@@ -36,6 +40,9 @@ const initialState: UserState = {
   total: 0,
   page: 0,
   totalPages: 0,
+  studentDetail: null,
+  isModalOpen: false,
+  isEdit: false,
 };
 
 const token = localStorage.getItem("token");
@@ -103,6 +110,69 @@ export const createUser = createAsyncThunk<
   }
 );
 
+export const updateUser = createAsyncThunk<
+  User,
+  Partial<User>,
+  { rejectValue: string }
+>(`${USER_FEATURE_KEY}/updateUser`, async (userData, { rejectWithValue }) => {
+  try {
+    const response = await axios.patch(
+      `${import.meta.env.VITE_API_URL}user/update-user`,
+      userData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const message =
+        error.response?.data?.message?.message ||
+        error.response?.data?.message ||
+        "Update issue";
+      return rejectWithValue(message);
+    } else {
+      return rejectWithValue("An unknown error occurred");
+    }
+  }
+});
+
+export const fetchUserById = createAsyncThunk(
+  `${USER_FEATURE_KEY}/fetchUserById`,
+  async ({ id }: { id: string }) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}user/get-user/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }
+);
+
+// action
+export const openUserModal = createAction(
+  `${USER_FEATURE_KEY}/openUserModal`,
+  (data: boolean) => {
+    return {
+      payload: data,
+    };
+  }
+);
+
+export const isEdit = createAction(
+  `${USER_FEATURE_KEY}/isEdit`,
+  (data: boolean) => {
+    return {
+      payload: data,
+    };
+  }
+);
+
 // Slice
 const userSlice = createSlice({
   name: USER_FEATURE_KEY,
@@ -119,6 +189,15 @@ const userSlice = createSlice({
     setError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
       state.isLoading = false; // Stop loading if error occurs
+    },
+    openUserModal: (state, action: PayloadAction<boolean>) => {
+      state.isModalOpen = action.payload;
+    },
+    isEdit: (state, action: PayloadAction<boolean>) => {
+      state.isEdit = action.payload;
+      if (!action.payload) {
+        state.studentDetail = null;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -154,6 +233,33 @@ const userSlice = createSlice({
       .addCase(createUser.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Failed to create user";
+      })
+      // update
+      .addCase(updateUser.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.users = state.users.map((user) =>
+          user.id === action.payload.id ? { ...user, ...action.payload } : user
+        );
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to create user";
+      })
+
+      // get single user
+      .addCase(fetchUserById.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchUserById.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.studentDetail = action.payload;
+      })
+      .addCase(fetchUserById.rejected, (state) => {
+        state.status = "failed";
+        state.error = "Failed to create user";
       });
   },
 });
@@ -177,12 +283,19 @@ export const selectUserStatus = createSelector(
   (userState) => userState.status
 );
 
+export const selectStudentDetail = createSelector(
+  getUserState,
+  (userState) => userState.studentDetail
+);
+
 // Actions
 export const { setCurrentUser, resetUserState, setError } = userSlice.actions;
 
 export const selectUserError = (state: RootState) => state.users.error;
 export const selectTotalUsers = (state: RootState) => state.users.total;
 export const selectTotalPages = (state: RootState) => state.users.totalPages;
+export const selectIsModalOpen = (state: RootState) => state.users.isModalOpen;
+export const selectIsUserEdit = (state: RootState) => state.users.isEdit;
 
 // Reducer
 export default userSlice.reducer;

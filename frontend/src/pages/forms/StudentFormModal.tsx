@@ -10,11 +10,18 @@ import {
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../store";
-import { createUser, selectUserError } from "../../store/slices/user.slice";
+import {
+  createUser,
+  selectIsUserEdit,
+  selectStudentDetail,
+  selectUserError,
+  updateUser,
+} from "../../store/slices/user.slice";
 import * as Yup from "yup";
-import { RegisterFormData } from "../../types";
+import { RegisterFormDataModal } from "../../types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 
 interface StudentFormProps {
   open: boolean;
@@ -29,34 +36,76 @@ const StudentFormModal = ({
 }: StudentFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const error = useSelector(selectUserError);
+  const selectedStudent = useSelector(selectStudentDetail);
 
-  const validationSchema = Yup.object().shape({
-    firstName: Yup.string().required("First Name is required"),
-    lastName: Yup.string().required("Last Name is required"),
-    email: Yup.string()
-      .email("Enter a valid email")
-      .required("Email is required"),
-    password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password")], "Passwords must match")
-      .required("Confirm Password is required"),
-  });
+  console.log("selectedStudent", selectedStudent);
+
+  const isEdit = useSelector(selectIsUserEdit);
+
+  const createValidationSchema = (isEdit: boolean) => {
+    const baseSchema = Yup.object().shape({
+      firstName: Yup.string().required("First Name is required"),
+      lastName: Yup.string().required("Last Name is required"),
+      email: Yup.string()
+        .email("Enter a valid email")
+        .required("Email is required"),
+    });
+
+    if (isEdit) {
+      return baseSchema;
+    }
+
+    return baseSchema.concat(
+      Yup.object().shape({
+        password: Yup.string()
+          .min(6, "Password must be at least 6 characters")
+          .required("Password is required"),
+        confirmPassword: Yup.string()
+          .oneOf([Yup.ref("password")], "Passwords must match")
+          .required("Confirm Password is required"),
+      })
+    );
+  };
+
+  const validationSchema = createValidationSchema(isEdit);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
-  } = useForm<RegisterFormData>({
+    reset,
+  } = useForm<RegisterFormDataModal>({
     resolver: yupResolver(validationSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+    },
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
+  useEffect(() => {
+    if (selectedStudent) {
+      reset({
+        firstName: selectedStudent.firstName,
+        lastName: selectedStudent.lastName,
+        email: selectedStudent.email,
+      });
+    } else {
+      reset({
+        firstName: "",
+        lastName: "",
+        email: "",
+      });
+    }
+  }, [selectedStudent, reset]);
+
+  const onSubmit = async (data: RegisterFormDataModal) => {
     try {
       await dispatch(
-        createUser({ ...data, role: "STUDENT", isActive: true })
+        isEdit
+          ? updateUser({ ...data, id: selectedStudent?.id })
+          : createUser({ ...data, role: "STUDENT", isActive: true })
       ).unwrap();
 
       if (handleClose) {
@@ -124,24 +173,28 @@ const StudentFormModal = ({
             error={!!errors.email}
             helperText={errors.email?.message}
           />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            {...register("password")}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
-          <TextField
-            label="Confirm Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            {...register("confirmPassword")}
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword?.message}
-          />
+          {!isEdit && (
+            <>
+              <TextField
+                label="Password"
+                type="password"
+                fullWidth
+                margin="normal"
+                {...register("password")}
+                error={!!errors.password}
+                helperText={errors.password?.message}
+              />
+              <TextField
+                label="Confirm Password"
+                type="password"
+                fullWidth
+                margin="normal"
+                {...register("confirmPassword")}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword?.message}
+              />
+            </>
+          )}
 
           {error && (
             <Typography color="error" sx={{ mt: 2 }}>
@@ -167,7 +220,7 @@ const StudentFormModal = ({
             {isSubmitting ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
-              "Register"
+              "SUBMIT"
             )}
           </Button>
           <Button

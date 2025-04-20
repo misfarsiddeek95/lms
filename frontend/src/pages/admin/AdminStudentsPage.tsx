@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUsers,
   selectAllUsers,
+  selectIsModalOpen,
   selectTotalPages,
   selectUserError,
   selectUserStatus,
@@ -26,10 +27,11 @@ import StudentFormModal from "../forms/StudentFormModal";
 const AdminStudentsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const totalPages = useSelector(selectTotalPages);
-
   const [page, setPage] = useState(1);
   const [open, setOpen] = React.useState(false);
+
+  const totalPages = useSelector(selectTotalPages);
+  const openModal = useSelector(selectIsModalOpen);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -54,6 +56,22 @@ const AdminStudentsPage = () => {
   const handleClickOpen = () => {
     setOpen(true);
   };
+
+  const handleClose = () => {
+    setOpen(false);
+    dispatch({
+      type: "users/openUserModal",
+      payload: false,
+    });
+    dispatch({
+      type: "users/isEdit",
+      payload: false,
+    });
+  };
+
+  useEffect(() => {
+    setOpen(openModal);
+  }, [openModal]);
 
   /*  const columns: GridColDef[] = [
     {
@@ -168,7 +186,7 @@ const AdminStudentsPage = () => {
       <StudentFormModal
         open={open}
         fullscreen={fullScreen}
-        handleClose={() => setOpen(false)}
+        handleClose={handleClose}
       />
     </CommonBodyLayout>
   );

@@ -1,5 +1,5 @@
 // components/CommonCollapsibleTable.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -20,6 +20,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../store";
+import {
+  fetchUserById,
+  selectAllUsers,
+  updateUser,
+} from "../store/slices/user.slice";
 
 interface Course {
   courseId: string;
@@ -44,106 +51,148 @@ interface CommonCollapsibleTableProps {
   students: Student[];
 }
 
-function StudentRow({ student }: { student: Student }) {
-  const [open, setOpen] = React.useState(false);
+const StudentRow = React.memo(
+  ({ student }: { student: Student }) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const [open, setOpen] = React.useState(false);
+    const [switchStatus, setSwitchStatus] = useState(student.isActive);
 
-  const label = { inputProps: { "aria-label": "Color switch demo" } };
+    const [selectedUserId, setSelectedUserId] = useState<number>();
 
-  const handleEdit = ({ id }: { id: number }) => {
-    console.log(`Edit user with ID ${id}`);
-  };
+    const label = { inputProps: { "aria-label": "Color switch demo" } };
 
-  const handleDelete = ({ id }: { id: number }) => {
-    console.log(`Delete user with ID ${id}`);
-  };
+    const handleEdit = ({ id }: { id: number }) => {
+      dispatch(fetchUserById({ id: id.toString() })).then(() => {
+        dispatch({
+          type: "users/openUserModal",
+          payload: true,
+        });
+        dispatch({
+          type: "users/isEdit",
+          payload: true,
+        });
+      });
+    };
 
-  return (
-    <>
-      <TableRow>
-        <TableCell>
-          <IconButton size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-          </IconButton>
-        </TableCell>
-        <TableCell>{student.firstName}</TableCell>
-        <TableCell>{student.lastName}</TableCell>
-        <TableCell>{student.email}</TableCell>
-        <TableCell>
-          <Switch {...label} defaultChecked />
-        </TableCell>
-        <TableCell align="center">
-          {student?.courses && student.courses.length > 0 ? (
-            <CheckCircleIcon color="success" />
-          ) : (
-            <CancelIcon color="error" />
-          )}
-        </TableCell>
-        <TableCell align="right">
-          <IconButton
-            color="primary"
-            onClick={() => handleEdit({ id: +student.id })}
-          >
-            <EditIcon />
-          </IconButton>
-          <IconButton
-            color="error"
-            onClick={() => handleDelete({ id: +student.id })}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell colSpan={7} sx={{ paddingBottom: 0, paddingTop: 0 }}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                component="div"
-                textAlign={"center"}
-                fontWeight={700}
-              >
-                Enrolled Courses
-              </Typography>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Course Name</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      Course Duration
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      Enrolled Date
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>
-                      Fee ($)
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {student.courses &&
-                    student.courses.map((course) => (
-                      <TableRow key={course.courseId}>
-                        <TableCell>{course.courseName}</TableCell>
-                        <TableCell>{course.duration}</TableCell>
-                        <TableCell>{course.enrolledDate}</TableCell>
-                        <TableCell align="right">{course.fee}</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  );
-}
+    const handleDelete = ({ id }: { id: number }) => {
+      console.log(`Delete user with ID ${id}`);
+    };
+
+    useEffect(() => {
+      if (selectedUserId !== undefined) {
+        dispatch(updateUser({ id: selectedUserId, isActive: switchStatus }));
+      }
+    }, [switchStatus, selectedUserId, dispatch]);
+
+    return (
+      <>
+        <TableRow>
+          <TableCell>
+            <IconButton size="small" onClick={() => setOpen(!open)}>
+              {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+            </IconButton>
+          </TableCell>
+          <TableCell>{student.firstName}</TableCell>
+          <TableCell>{student.lastName}</TableCell>
+          <TableCell>{student.email}</TableCell>
+          <TableCell>
+            <Switch
+              {...label}
+              checked={switchStatus}
+              onChange={(e) => {
+                setSwitchStatus(e.target.checked);
+                setSelectedUserId(student.id);
+              }}
+            />
+          </TableCell>
+          <TableCell align="center">
+            {student?.courses && student.courses.length > 0 ? (
+              <CheckCircleIcon color="success" />
+            ) : (
+              <CancelIcon color="error" />
+            )}
+          </TableCell>
+          <TableCell align="right">
+            <IconButton
+              color="primary"
+              onClick={() => handleEdit({ id: +student.id })}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              color="error"
+              onClick={() => handleDelete({ id: +student.id })}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell colSpan={7} sx={{ paddingBottom: 0, paddingTop: 0 }}>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <Box sx={{ margin: 1 }}>
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  component="div"
+                  textAlign={"center"}
+                  fontWeight={700}
+                >
+                  Enrolled Courses
+                </Typography>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        Course Name
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        Course Duration
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        Enrolled Date
+                      </TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>
+                        Fee ($)
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {student.courses &&
+                      student.courses.map((course) => (
+                        <TableRow key={course.courseId}>
+                          <TableCell>{course.courseName}</TableCell>
+                          <TableCell>{course.duration}</TableCell>
+                          <TableCell>{course.enrolledDate}</TableCell>
+                          <TableCell align="right">{course.fee}</TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      </>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if student data has changed
+    return prevProps.student.isActive === nextProps.student.isActive;
+  }
+);
 
 export default function CommonCollapsibleTable({
   students,
 }: CommonCollapsibleTableProps) {
+  const selectStudents = useSelector(selectAllUsers);
+
+  const [studentList, setStudentList] = useState(students);
+
+  useEffect(() => {
+    setStudentList(selectStudents);
+  }, [selectStudents]);
+
   return (
     <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
       <Table sx={{ width: "100%", minWidth: 1000 }}>
@@ -163,7 +212,7 @@ export default function CommonCollapsibleTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {students.map((student) => (
+          {studentList.map((student) => (
             <StudentRow key={student.id} student={student} />
           ))}
         </TableBody>
