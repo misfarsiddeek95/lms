@@ -64,7 +64,7 @@ export const login = createAsyncThunk(
 
       const token = access_token;
 
-      console.log("✅ Login success:", user, token);
+      console.log("Login success:", user, token);
 
       dispatch(setCredentials({ user, token }));
 

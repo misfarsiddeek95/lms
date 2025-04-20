@@ -8,10 +8,6 @@ export function useAuth() {
     (state: RootState) => state.auth
   );
 
-  // Debugging: Log user and token to check if state is being populated
-  console.log("user:", user);
-  console.log("token:", token);
-
   return {
     user,
     token,

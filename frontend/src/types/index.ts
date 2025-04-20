@@ -13,4 +13,5 @@ export interface User {
   lastName?: string;
   role: "ADMIN" | "STUDENT";
   name: string;
+  isActive?: boolean;
 }
