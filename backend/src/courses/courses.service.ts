@@ -2,23 +2,49 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CoursesService {
   constructor(private prisma: PrismaService) {}
 
-  async fetchAllCourses() {
-    return await this.prisma.course.findMany({
-      where: { isPublished: true },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        currency: true,
-        price: true,
-        duration: true,
-      },
-    });
+  async fetchAllCourses({
+    search,
+    page,
+    limit,
+  }: {
+    search?: string;
+    page: number;
+    limit: number;
+  }) {
+    const where = {
+      isPublished: true,
+      ...(search
+        ? {
+            name: {
+              contains: search,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          }
+        : {}),
+    };
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.course.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.course.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async createOrUpdate(data: UpdateCourseDto) {

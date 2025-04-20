@@ -18,11 +18,19 @@ interface Course {
   currency: string;
 }
 
+interface CourseResponse {
+  data: Course[];
+  page: number;
+  totalPages: number;
+}
+
 interface CourseState {
   courses: Course[];
   currentCourse: Course | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+  page: number;
+  totalPages: number;
 }
 
 const initialState: CourseState = {
@@ -30,18 +38,21 @@ const initialState: CourseState = {
   currentCourse: null,
   status: "idle",
   error: null,
+  page: 0,
+  totalPages: 0,
 };
 
 // Async Thunks
-export const fetchCourses = createAsyncThunk(
-  "courses/fetchCourses",
-  async () => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}courses/fetch-all-courses`
-    );
-    return response.data;
-  }
-);
+export const fetchCourses = createAsyncThunk<
+  CourseResponse,
+  { page?: number; limit?: number; search?: string }
+>("courses/fetchCourses", async ({ page = 1, limit = 10, search = "" }) => {
+  const response = await axios.get(
+    `${import.meta.env.VITE_API_URL}courses/fetch-all-courses`,
+    { params: { page, limit, search } }
+  );
+  return response.data;
+});
 
 const courseSlice = createSlice({
   name: COURSE_FEATURE_KEY,
@@ -63,9 +74,11 @@ const courseSlice = createSlice({
       })
       .addCase(
         fetchCourses.fulfilled,
-        (state, action: PayloadAction<Course[]>) => {
+        (state, action: PayloadAction<CourseResponse>) => {
           state.status = "succeeded";
-          state.courses = action.payload;
+          state.courses = action.payload.data;
+          state.page = action.payload.page;
+          state.totalPages = action.payload.totalPages;
         }
       )
       .addCase(fetchCourses.rejected, (state, action) => {

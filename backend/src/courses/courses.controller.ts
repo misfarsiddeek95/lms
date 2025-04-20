@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -24,6 +25,7 @@ import {
   ApiParam,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 
@@ -57,8 +59,19 @@ export class CoursesController {
       ],
     },
   })
-  fetchAllCourses() {
-    return this.coursesService.fetchAllCourses();
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  fetchAllCourses(
+    @Query('search') search?: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.coursesService.fetchAllCourses({
+      search,
+      page: +page,
+      limit: +limit,
+    });
   }
 
   @Post('create-or-update-course')
