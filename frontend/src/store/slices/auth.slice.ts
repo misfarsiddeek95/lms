@@ -71,7 +71,8 @@ export const login = createAsyncThunk(
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const message = error.response?.data?.message || "Login failed";
+        const message =
+          error.response?.data?.message?.message || "Login failed";
         dispatch(setError(message));
         throw error;
       } else {

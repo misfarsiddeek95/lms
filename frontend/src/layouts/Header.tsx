@@ -6,13 +6,18 @@ import {
   Avatar,
   Box,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
 
-  console.log("Stored Auth in localStorage:", localStorage.getItem("auth"));
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout(); // Perform logout logic
+    navigate("/"); // Redirect to the home page after logout
+  };
 
   return (
     <AppBar
@@ -32,8 +37,13 @@ export default function Header() {
 
         {isAuthenticated ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar alt={user?.name} src="/static/images/avatar/1.jpg" />
-            <Button color="inherit" onClick={logout}>
+            <Avatar
+              alt={user?.name}
+              src="/static/images/avatar/1.jpg"
+              component={Link}
+              to={"/dashboard"}
+            />
+            <Button color="inherit" onClick={handleLogout}>
               Logout
             </Button>
           </Box>
