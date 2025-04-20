@@ -23,6 +23,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../store";
 import {
+  deleteUser,
   fetchUserById,
   selectAllUsers,
   updateUser,
@@ -76,6 +77,7 @@ const StudentRow = React.memo(
 
     const handleDelete = ({ id }: { id: number }) => {
       console.log(`Delete user with ID ${id}`);
+      dispatch(deleteUser({ id: id.toString() }));
     };
 
     useEffect(() => {

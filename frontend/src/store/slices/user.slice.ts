@@ -154,6 +154,21 @@ export const fetchUserById = createAsyncThunk(
   }
 );
 
+export const deleteUser = createAsyncThunk(
+  `${USER_FEATURE_KEY}/deleteUser`,
+  async ({ id }: { id: string }) => {
+    const response = await axios.delete(
+      `${import.meta.env.VITE_API_URL}user/delete-user/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }
+);
+
 // action
 export const openUserModal = createAction(
   `${USER_FEATURE_KEY}/openUserModal`,
@@ -260,6 +275,20 @@ const userSlice = createSlice({
       .addCase(fetchUserById.rejected, (state) => {
         state.status = "failed";
         state.error = "Failed to create user";
+      })
+      // delete user
+      .addCase(deleteUser.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.users = state.users.filter(
+          (user) => user.id !== action.payload.id
+        );
+      })
+      .addCase(deleteUser.rejected, (state) => {
+        state.status = "failed";
+        state.error = "Failed to delete user";
       });
   },
 });
