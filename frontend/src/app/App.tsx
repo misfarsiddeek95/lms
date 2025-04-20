@@ -13,39 +13,43 @@ import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminStudentsPage from "../pages/admin/AdminStudentsPage";
 import HomePage from "../pages/HomePage";
 import theme from "../theme/theme";
+import { Provider } from "react-redux";
+import { store } from "../store";
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<PublicLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/courses" element={<CoursesPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Route>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<PublicLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/courses" element={<CoursesPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+            </Route>
 
-          {/* Protected student routes */}
-          <Route element={<MainLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/courses" element={<CoursesPage />} />
-            <Route path="/enrollments" element={<EnrollmentsPage />} />
-          </Route>
+            {/* Protected student routes */}
+            <Route element={<MainLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/courses" element={<CoursesPage />} />
+              <Route path="/enrollments" element={<EnrollmentsPage />} />
+            </Route>
 
-          {/* Protected admin routes */}
-          <Route element={<MainLayout />}>
-            <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/admin/courses" element={<AdminCoursesPage />} />
-            <Route path="/admin/students" element={<AdminStudentsPage />} />
-          </Route>
+            {/* Protected admin routes */}
+            <Route element={<MainLayout />}>
+              <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/admin/courses" element={<AdminCoursesPage />} />
+              <Route path="/admin/students" element={<AdminStudentsPage />} />
+            </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </Provider>
   );
 }
 

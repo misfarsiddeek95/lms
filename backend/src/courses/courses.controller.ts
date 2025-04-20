@@ -25,6 +25,7 @@ import {
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Courses') // Groups all course-related endpoints
 @ApiBearerAuth()
@@ -33,6 +34,32 @@ import {
 @Roles(Role.ADMIN)
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
+
+  @Get('fetch-all-courses')
+  @Public()
+  @ApiOperation({ summary: 'Fetch all courses (public)' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all available courses',
+    schema: {
+      example: [
+        {
+          id: 1,
+          name: 'Intro to JS',
+          description: 'JavaScript basics for beginners.',
+          duration: '2 Months',
+          price: '149.99',
+          currency: 'USD',
+          isPublished: true,
+          createdAt: '2025-04-19T22:00:00.000Z',
+          updatedAt: '2025-04-19T22:00:00.000Z',
+        },
+      ],
+    },
+  })
+  fetchAllCourses() {
+    return this.coursesService.fetchAllCourses();
+  }
 
   @Post('create-or-update-course')
   @ApiOperation({

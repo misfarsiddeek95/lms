@@ -7,6 +7,20 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class CoursesService {
   constructor(private prisma: PrismaService) {}
 
+  async fetchAllCourses() {
+    return await this.prisma.course.findMany({
+      where: { isPublished: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        currency: true,
+        price: true,
+        duration: true,
+      },
+    });
+  }
+
   async createOrUpdate(data: UpdateCourseDto) {
     try {
       const course = await this.prisma.course.upsert({

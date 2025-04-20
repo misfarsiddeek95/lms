@@ -5,11 +5,15 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Grid } from "@mui/material";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 
 interface Course {
-  courseId: string | number;
-  title: string;
-  desc: string;
+  id: number;
+  name: string;
+  duration: string;
+  description: string;
+  price: string;
+  currency: string;
 }
 interface CardProps {
   courseData: Course[];
@@ -17,27 +21,52 @@ interface CardProps {
 
 export default function CourseCard({ courseData }: CardProps) {
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={5}>
       {courseData &&
         courseData.map((course) => (
-          <Grid size={{ xs: 3, md: 6 }} key={course.courseId}>
-            <Card sx={{ maxWidth: 345 }}>
+          <Grid size={{ xs: 3, md: 3 }} key={course.id}>
+            <Card
+              sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+            >
               <CardMedia
-                component="img"
-                alt="green iguana"
-                height="140"
-                image="/static/images/cards/contemplative-reptile.jpg"
-              />
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                  {course.title}
+                sx={{
+                  height: 140,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#ea80fc",
+                }}
+              >
+                <AutoStoriesIcon sx={{ fontSize: 60, color: "white" }} />
+              </CardMedia>
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography
+                  gutterBottom
+                  variant="h5"
+                  component="div"
+                  textAlign={"center"}
+                >
+                  {course.name}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {course.desc}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: 200,
+                  }}
+                >
+                  {course.description}
                 </Typography>
               </CardContent>
-              <CardActions>
+              <CardActions disableSpacing>
                 <Button size="small">Learn More</Button>
+                <Button size="small" sx={{ marginLeft: "auto" }}>
+                  {course.currency}
+                  {course.price}
+                </Button>
               </CardActions>
             </Card>
           </Grid>
