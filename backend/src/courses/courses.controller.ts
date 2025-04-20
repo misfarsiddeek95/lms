@@ -74,6 +74,51 @@ export class CoursesController {
     });
   }
 
+  @Get('course-detail/:id')
+  @Public()
+  @ApiOperation({ summary: 'Get Course Detail by ID' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+    description: 'The ID of the course to retrieve',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Course detail retrieved successfully',
+    schema: {
+      example: {
+        id: 11,
+        name: 'ReactJS for Beginners',
+        description:
+          'A brief introduction to ReactJS for beginners, learn React from scratch.',
+        duration: '5 hours',
+        price: '83',
+        currency: 'USD',
+        isPublished: true,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Course not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        timestamp: '2025-04-20T11:00:34.546Z',
+        path: '/api/courses/course-detail/113',
+        message: {
+          message: "Couldn't find the course for given ID.",
+          error: 'Not Found',
+          statusCode: 404,
+        },
+      },
+    },
+  })
+  fetchCourseDetail(@Param('id') id: string) {
+    return this.coursesService.fetchCourseDetail(+id);
+  }
+
   @Post('create-or-update-course')
   @ApiOperation({
     summary: 'Create or update a course',

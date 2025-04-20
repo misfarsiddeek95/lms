@@ -7,17 +7,9 @@ import {
 import { RootState } from "..";
 import axios from "axios";
 import { COURSES_LIST_COUNT } from "../../constants";
+import { Course } from "../../types";
 
 export const COURSE_FEATURE_KEY = "courses";
-
-interface Course {
-  id: number;
-  name: string;
-  description: string;
-  duration: string;
-  price: string;
-  currency: string;
-}
 
 interface CourseResponse {
   data: Course[];
@@ -32,6 +24,7 @@ interface CourseState {
   error: string | null;
   page: number;
   totalPages: number;
+  courseDetail: Course | null;
 }
 
 const initialState: CourseState = {
@@ -41,6 +34,7 @@ const initialState: CourseState = {
   error: null,
   page: 0,
   totalPages: 0,
+  courseDetail: null,
 };
 
 // Async Thunks
@@ -53,6 +47,16 @@ export const fetchCourses = createAsyncThunk<
     const response = await axios.get(
       `${import.meta.env.VITE_API_URL}courses/fetch-all-courses`,
       { params: { page, limit, search } }
+    );
+    return response.data;
+  }
+);
+
+export const fetchCourseById = createAsyncThunk(
+  "courses/fetchCourseById",
+  async ({ id }: { id: string }) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}courses/course-detail/${id}`
     );
     return response.data;
   }
@@ -88,6 +92,22 @@ const courseSlice = createSlice({
       .addCase(fetchCourses.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message || "Failed to fetch courses";
+      })
+
+      // fetch course detail
+      .addCase(fetchCourseById.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(
+        fetchCourseById.fulfilled,
+        (state, action: PayloadAction<Course>) => {
+          state.status = "succeeded";
+          state.courseDetail = action.payload;
+        }
+      )
+      .addCase(fetchCourseById.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message || "Failed to fetch course detail";
       });
   },
 });
@@ -101,6 +121,11 @@ export const getCourseState = (rootState: RootState): CourseState =>
 export const selectAllCourses = createSelector(
   getCourseState,
   (courseState) => courseState.courses
+);
+
+export const selectCourseDetail = createSelector(
+  getCourseState,
+  (courseState) => courseState.courseDetail
 );
 
 // Actions

@@ -20,15 +20,8 @@ import { COURSES_LIST_COUNT } from "../constants";
 
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
+import { Course } from "../types";
 
-interface Course {
-  id: number;
-  name: string;
-  duration: string;
-  description: string;
-  price: string;
-  currency: string;
-}
 const CoursesPage = () => {
   const dispatch = useDispatch<AppDispatch>();
 

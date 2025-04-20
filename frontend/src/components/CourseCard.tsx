@@ -6,20 +6,15 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Grid } from "@mui/material";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import { useNavigate } from "react-router";
+import { Course } from "../types";
 
-interface Course {
-  id: number;
-  name: string;
-  duration: string;
-  description: string;
-  price: string;
-  currency: string;
-}
 interface CardProps {
   courseData: Course[];
 }
 
 export default function CourseCard({ courseData }: CardProps) {
+  const navigate = useNavigate();
   return (
     <Grid container spacing={5}>
       {courseData &&
@@ -62,7 +57,12 @@ export default function CourseCard({ courseData }: CardProps) {
                 </Typography>
               </CardContent>
               <CardActions disableSpacing>
-                <Button size="small">Learn More</Button>
+                <Button
+                  size="small"
+                  onClick={() => navigate(`/course-detail/${course.id}`)}
+                >
+                  Learn More
+                </Button>
                 <Button size="small" sx={{ marginLeft: "auto" }}>
                   {course.currency}
                   {course.price}

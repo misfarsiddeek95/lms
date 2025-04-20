@@ -47,6 +47,24 @@ export class CoursesService {
     };
   }
 
+  async fetchCourseDetail(id: number) {
+    try {
+      const course = await this.prisma.course.findUnique({
+        where: { id: +id },
+      });
+
+      if (!course) {
+        throw new NotFoundException("Couldn't find the course for given ID.");
+      }
+
+      const { createdAt, updatedAt, ...result } = course;
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createOrUpdate(data: UpdateCourseDto) {
     try {
       const course = await this.prisma.course.upsert({
