@@ -12,10 +12,11 @@ import LoginPage from "../pages/LoginPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminStudentsPage from "../pages/admin/AdminStudentsPage";
 import HomePage from "../pages/HomePage";
+import CourseDetailPage from "../pages/CourseDetailPage";
 import theme from "../theme/theme";
 import { Provider } from "react-redux";
 import { store } from "../store";
-import CourseDetailPage from "../pages/CourseDetailPage";
+import GuestRoute from "../components/GuestRoute";
 
 function App() {
   return (
@@ -26,11 +27,25 @@ function App() {
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<PublicLayout />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/courses" element={<CoursesPage />} />
-              <Route path="/course-detail/:id" element={<CourseDetailPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route index element={<HomePage />} />
+              <Route path="courses" element={<CoursesPage />} />
+              <Route path="course-detail/:id" element={<CourseDetailPage />} />
+              <Route
+                path="login"
+                element={
+                  <GuestRoute>
+                    <LoginPage />
+                  </GuestRoute>
+                }
+              />
+              <Route
+                path="register"
+                element={
+                  <GuestRoute>
+                    <RegisterPage />
+                  </GuestRoute>
+                }
+              />
             </Route>
 
             {/* Protected student routes */}

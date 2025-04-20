@@ -10,10 +10,19 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  console.log("Stored Auth in localStorage:", localStorage.getItem("auth"));
 
   return (
-    <AppBar position="static" elevation={0}>
+    <AppBar
+      position="fixed"
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        ml: "240px",
+        width: "calc(100% - 240px)",
+      }}
+    >
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
@@ -21,9 +30,9 @@ export default function Header() {
           </Link>
         </Typography>
 
-        {user ? (
+        {isAuthenticated ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar alt={user.firstName} src="/static/images/avatar/1.jpg" />
+            <Avatar alt={user?.name} src="/static/images/avatar/1.jpg" />
             <Button color="inherit" onClick={logout}>
               Logout
             </Button>

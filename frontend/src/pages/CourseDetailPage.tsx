@@ -18,16 +18,19 @@ import {
   fetchCourseById,
   selectCourseDetail,
 } from "../store/slices/course.slice";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Course } from "../types";
 
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import { useAuth } from "../hooks/useAuth";
 
 const CourseDetailPage = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const course: Course | null = useSelector(selectCourseDetail);
+  const { user } = useAuth();
 
   console.log("course", course);
 
@@ -36,6 +39,16 @@ const CourseDetailPage = () => {
       dispatch(fetchCourseById({ id }));
     }
   }, [dispatch, id]);
+
+  const handleEnroll = () => {
+    if (!user) {
+      navigate("/login"); // Not logged in → redirect to login
+      return;
+    }
+
+    // TODO: Implement actual enrollment logic here
+    console.log("Enrolling in course ID:", id);
+  };
 
   return (
     <CommonBodyLayout>
@@ -91,6 +104,7 @@ const CourseDetailPage = () => {
                 variant="outlined"
                 fullWidth
                 sx={{ fontWeight: 700, my: 2 }}
+                onClick={handleEnroll}
               >
                 Enroll
               </Button>
