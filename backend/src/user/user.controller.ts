@@ -27,6 +27,7 @@ import {
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Users') // Groups all user-related endpoints
 @ApiBearerAuth()
@@ -69,6 +70,7 @@ export class UserController {
       },
     },
   })
+  @Public()
   async register(
     @Body()
     registerDto: CreateUserDto,
