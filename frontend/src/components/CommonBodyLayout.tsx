@@ -7,7 +7,7 @@ interface CommonBodyLayoutProps {
 
 const CommonBodyLayout = ({ children }: CommonBodyLayoutProps) => {
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
+    <Container maxWidth={false} sx={{ px: 3 }}>
       {children}
     </Container>
   );

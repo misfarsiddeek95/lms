@@ -1,4 +1,4 @@
-import CommonBodyLayout from "./CommonBodyLayout";
+import CommonBodyLayout from "../components/CommonBodyLayout";
 import {
   FormControl,
   IconButton,

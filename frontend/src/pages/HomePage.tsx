@@ -1,7 +1,7 @@
 import { Box, Typography, Button, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import { LightbulbOutlined, SchoolOutlined } from "@mui/icons-material";
-import CommonBodyLayout from "./CommonBodyLayout";
+import CommonBodyLayout from "../components/CommonBodyLayout";
 const HomePage = () => {
   const theme = useTheme();
   return (

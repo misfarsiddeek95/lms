@@ -107,6 +107,7 @@ export const authSlice = createSlice({
 
       // Save to localStorage
       localStorage.setItem("auth", JSON.stringify({ user, token }));
+      localStorage.setItem("token", token);
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -123,6 +124,7 @@ export const authSlice = createSlice({
 
       // Remove auth data from localStorage
       localStorage.removeItem("auth");
+      localStorage.removeItem("token");
     },
     clearError: (state) => {
       state.error = null;

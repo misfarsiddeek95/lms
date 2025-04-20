@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import CommonBodyLayout from "./CommonBodyLayout";
+import CommonBodyLayout from "../components/CommonBodyLayout";
 import {
   Button,
   Card,

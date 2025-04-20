@@ -8,6 +8,7 @@ import {
   Param,
   Get,
   Req,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtGuard } from 'src/common/guards/jwt.guard';
@@ -36,6 +37,14 @@ import { Public } from 'src/common/decorators/public.decorator';
 @Roles(Role.ADMIN)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('fetch-students')
+  fetchStudents(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 8,
+  ) {
+    return this.userService.fetchStudents({ page: +page, limit: +limit });
+  }
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })

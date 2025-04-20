@@ -56,7 +56,7 @@ export default function Sidebar() {
             key={item.text}
             component={RouterLink}
             to={item.path}
-            selected={location.pathname.startsWith(item.path)}
+            selected={location.pathname === item.path}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />

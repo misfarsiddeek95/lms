@@ -6,6 +6,14 @@ export interface Course {
   price: string;
   currency: string;
 }
+
+interface CourseForCollapse {
+  courseId: string;
+  courseName: string;
+  enrolledDate: string;
+  duration: string;
+  fee: number;
+}
 export interface User {
   id: number;
   email?: string;
@@ -14,4 +22,5 @@ export interface User {
   role: "ADMIN" | "STUDENT";
   name: string;
   isActive?: boolean;
+  courses?: CourseForCollapse[];
 }

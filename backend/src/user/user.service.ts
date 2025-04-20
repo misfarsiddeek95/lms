@@ -14,6 +14,50 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  async fetchStudents({ page, limit }: { page: number; limit: number }) {
+    const [students, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where: {
+          role: 'STUDENT',
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          enrollments: {
+            include: {
+              course: true,
+            },
+          },
+        },
+      }),
+      this.prisma.user.count({ where: { role: 'STUDENT' } }),
+    ]);
+
+    const result = students.map((student) => ({
+      id: student.id,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      isActive: student.isActive,
+      role: student.role,
+      email: student.email,
+      courses: student.enrollments.map((enrollment) => ({
+        courseId: enrollment.course.id.toString(),
+        courseName: enrollment.course.name,
+        enrolledDate: new Date(enrollment.enrolledAt).toLocaleDateString(), // Format as needed
+        fee: enrollment.course.currency + ' ' + enrollment.course.price,
+        duration: enrollment.course.duration,
+      })),
+    }));
+
+    return {
+      data: result,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   async register(data: CreateUserDto) {
     try {
       const hashedPassword = await bcrypt.hash(data.password, 10);
