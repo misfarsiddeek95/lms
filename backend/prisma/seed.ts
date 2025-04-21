@@ -40,7 +40,57 @@ async function main() {
     },
   });
 
-  console.log('upsert', upsert, upsert2);
+  const courses = await prisma.course.createMany({
+    data: [
+      {
+        name: 'Complete Python Programming',
+        description:
+          'Learn Python from basics to advanced topics with real-world projects.',
+        duration: '8 hours',
+        price: '49',
+        currency: 'USD',
+        isPublished: true,
+      },
+      {
+        name: 'Mastering Excel for Beginners',
+        description:
+          'Start using Excel confidently with formulas, functions, charts, and data management.',
+        duration: '5 hours',
+        price: '34',
+        currency: 'USD',
+        isPublished: true,
+      },
+      {
+        name: 'Web Development Bootcamp',
+        description:
+          'Full-stack web development with HTML, CSS, JavaScript, and backend frameworks.',
+        duration: '20 hours',
+        price: '99',
+        currency: 'USD',
+        isPublished: true,
+      },
+      {
+        name: 'Introduction to Machine Learning',
+        description:
+          'Understand core ML concepts, algorithms, and how to build simple models.',
+        duration: '10 hours',
+        price: '59',
+        currency: 'USD',
+        isPublished: false,
+      },
+      {
+        name: 'UI/UX Design Fundamentals',
+        description:
+          'Learn the essentials of user interface and user experience design.',
+        duration: '6 hours',
+        price: '39',
+        currency: 'USD',
+        isPublished: true,
+      },
+    ],
+  });
+
+  console.log('upsert', upsert, upsert2, courses);
 }
 
 main()
