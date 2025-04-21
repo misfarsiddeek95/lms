@@ -18,7 +18,6 @@ import ConfirmationPopup from "../../components/ConformationPopup";
 import {
   deleteEnrollment,
   fetchAllEnrollments,
-  getEnrollment,
   getEnrollmentState,
   selectAllEnrollments,
   selectIsEnrollmentModalOpen,
