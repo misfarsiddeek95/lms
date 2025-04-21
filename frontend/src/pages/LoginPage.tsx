@@ -152,6 +152,17 @@ const LoginPage = () => {
             )}
           </Button>
         </Box>
+        <Box sx={{ textAlign: "center", my: 4 }}>
+          <b>Sample credentials</b>
+          <br />
+          <span>
+            <b>Admin</b>: admin@admin.com / pass@123
+          </span>
+          <br />
+          <span>
+            <b>Student</b>: student@smail.com / pass@123
+          </span>
+        </Box>
       </form>
     </Box>
   );

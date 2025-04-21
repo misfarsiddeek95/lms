@@ -4,38 +4,38 @@ const prisma = new PrismaClient();
 async function main() {
   const upsert = await prisma.user.upsert({
     where: {
-      email: 'asmmisfar@gmail.com',
+      email: 'admin@admin.com',
     },
     create: {
-      firstName: 'Misfar',
-      lastName: 'Siddeek',
-      email: 'asmmisfar@gmail.com',
-      password: '$2b$10$WkIMrR/6v1R/XivNIz98fOLfIAZIIjDD2lCjIRQz77zkN.B.U.4oe', // michurippu
+      firstName: 'Super',
+      lastName: 'Admin',
+      email: 'admin@admin.com',
+      password: '$2b$10$gG2zebcqRzWxtJL8UAYqAeCLIr1U2e3DOw2.LBpefOy4gt4ZhIA1O', // pass@123
       role: 'ADMIN',
     },
     update: {
-      firstName: 'Misfar',
-      lastName: 'Siddeek',
-      email: 'asmmisfar@gmail.com',
+      firstName: 'Super',
+      lastName: 'Admin',
+      email: 'admin@admin.com',
       role: 'ADMIN',
     },
   });
 
   const upsert2 = await prisma.user.upsert({
     where: {
-      email: 'student@gmail.com',
+      email: 'student@smail.com',
     },
     create: {
       firstName: 'David',
       lastName: 'Bombal',
-      email: 'student@gmail.com',
-      password: '$2b$10$WkIMrR/6v1R/XivNIz98fOLfIAZIIjDD2lCjIRQz77zkN.B.U.4oe', // michurippu
+      email: 'student@smail.com',
+      password: '$2b$10$gG2zebcqRzWxtJL8UAYqAeCLIr1U2e3DOw2.LBpefOy4gt4ZhIA1O', // pass@123
       role: 'STUDENT',
     },
     update: {
       firstName: 'David',
       lastName: 'Bombal',
-      email: 'student@gmail.com',
+      email: 'student@smail.com',
       role: 'STUDENT',
     },
   });
