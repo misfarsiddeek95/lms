@@ -28,6 +28,7 @@ import {
   selectAllUsers,
   updateUser,
 } from "../store/slices/user.slice";
+import ConfirmationPopup from "./ConformationPopup";
 
 interface Course {
   courseId: string;
@@ -58,6 +59,9 @@ const StudentRow = React.memo(
     const [open, setOpen] = React.useState(false);
     const [switchStatus, setSwitchStatus] = useState(student.isActive);
 
+    const [deletePopup, setDeletePopup] = useState(false);
+    const [studentId, setStudentId] = useState<number | null>(null);
+
     const [selectedUserId, setSelectedUserId] = useState<number>();
 
     const label = { inputProps: { "aria-label": "Color switch demo" } };
@@ -76,8 +80,25 @@ const StudentRow = React.memo(
     };
 
     const handleDelete = ({ id }: { id: number }) => {
-      console.log(`Delete user with ID ${id}`);
-      dispatch(deleteUser({ id: id.toString() }));
+      setDeletePopup(true);
+      setStudentId(id);
+    };
+
+    const handleClosePopup = () => {
+      setDeletePopup(false);
+      setStudentId(null);
+    };
+
+    const handleConfirm = async () => {
+      try {
+        if (studentId) {
+          dispatch(deleteUser({ id: studentId.toString() }));
+        }
+      } catch (error) {
+        console.error("API error:", error);
+      } finally {
+        handleClosePopup(); // Close the dialog after API call
+      }
     };
 
     useEffect(() => {
@@ -175,6 +196,15 @@ const StudentRow = React.memo(
             </Collapse>
           </TableCell>
         </TableRow>
+
+        {/* Delete confirmation */}
+        <ConfirmationPopup
+          title="Are you sure?"
+          description="Do you really want to perform this action?"
+          open={deletePopup}
+          handleClose={handleClosePopup}
+          onConfirm={handleConfirm}
+        />
       </>
     );
   },
