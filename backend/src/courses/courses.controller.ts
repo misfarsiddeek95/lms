@@ -282,4 +282,10 @@ export class CoursesController {
       userId,
     });
   }
+
+  @Roles(Role.STUDENT)
+  @Get('my-courses/:id')
+  loadMyCourses(@Param('id') id: string) {
+    return this.coursesService.loadMyCourses(+id);
+  }
 }

@@ -189,4 +189,29 @@ export class CoursesService {
       throw error;
     }
   }
+
+  async loadMyCourses(userId: number) {
+    try {
+      const enrolledList = await this.prisma.enrollment.findMany({
+        where: {
+          userId: userId,
+        },
+        select: {
+          course: true,
+        },
+      });
+      const courses = enrolledList.map((item) => ({
+        id: item.course.id,
+        name: item.course.name,
+        description: item.course.description,
+        duration: item.course.duration,
+        price: item.course.price,
+        currency: item.course.currency,
+      }));
+
+      return courses;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

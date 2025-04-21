@@ -34,6 +34,7 @@ interface CourseState {
   isModalOpen: boolean;
   isEdit: boolean;
   searchedCourses: SearchedCourse[];
+  myCourses: Course[];
 }
 
 const initialState: CourseState = {
@@ -47,6 +48,7 @@ const initialState: CourseState = {
   isModalOpen: false,
   isEdit: false,
   searchedCourses: [],
+  myCourses: [],
 };
 
 const token = localStorage.getItem("token");
@@ -178,6 +180,21 @@ export const searchCourses = createAsyncThunk(
       }
       return rejectWithValue("Unknown error occurred");
     }
+  }
+);
+
+export const fetchMyCourses = createAsyncThunk(
+  "courses/fetchMyCourses",
+  async ({ id }: { id: string }) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}courses/my-courses/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   }
 );
 
@@ -317,6 +334,20 @@ const courseSlice = createSlice({
       .addCase(searchCourses.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
+      })
+
+      // my courses
+      .addCase(fetchMyCourses.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchMyCourses.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.myCourses = action.payload;
+      })
+      .addCase(fetchMyCourses.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
       });
   },
 });
@@ -347,5 +378,8 @@ export const selectIsCouserEdit = (state: RootState) => state.courses.isEdit;
 
 export const selectSearchedCourses = (state: RootState) =>
   state.courses.searchedCourses;
+
+export const selectMyCourses = (state: RootState) => state.courses.myCourses;
+export const loadingStatus = (state: RootState) => state.courses.status;
 
 export default courseSlice.reducer;

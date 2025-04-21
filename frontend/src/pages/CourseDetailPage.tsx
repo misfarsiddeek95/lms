@@ -23,6 +23,7 @@ import { Course } from "../types";
 
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import { useAuth } from "../hooks/useAuth";
+import { createEnrollment } from "../store/slices/enrollment.slice";
 
 const CourseDetailPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -43,6 +44,14 @@ const CourseDetailPage = () => {
   const handleEnroll = () => {
     if (!user) {
       navigate("/login"); // Not logged in → redirect to login
+      return;
+    }
+
+    if (id !== undefined) {
+      dispatch(
+        createEnrollment({ userId: user.id, courseIds: [parseInt(id)] })
+      );
+      navigate("/enrollments");
       return;
     }
 

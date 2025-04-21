@@ -11,9 +11,15 @@ import { Course } from "../types";
 
 interface CardProps {
   courseData: Course[];
+  showLearnMore?: boolean;
+  showDuration?: boolean;
 }
 
-export default function CourseCard({ courseData }: CardProps) {
+export default function CourseCard({
+  courseData,
+  showLearnMore = true,
+  showDuration = false,
+}: CardProps) {
   const navigate = useNavigate();
   return (
     <Grid container spacing={5}>
@@ -57,12 +63,18 @@ export default function CourseCard({ courseData }: CardProps) {
                 </Typography>
               </CardContent>
               <CardActions disableSpacing>
-                <Button
-                  size="small"
-                  onClick={() => navigate(`/course-detail/${course.id}`)}
-                >
-                  Learn More
-                </Button>
+                {showLearnMore && (
+                  <Button
+                    size="small"
+                    onClick={() => navigate(`/course-detail/${course.id}`)}
+                  >
+                    Learn More
+                  </Button>
+                )}
+                {showDuration && (
+                  <Button size="small">{course.duration}</Button>
+                )}
+
                 <Button size="small" sx={{ marginLeft: "auto" }}>
                   {course.currency}
                   {course.price}
