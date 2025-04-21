@@ -90,7 +90,69 @@ async function main() {
     ],
   });
 
-  console.log('upsert', upsert, upsert2, courses);
+  const users = await prisma.user.createMany({
+    data: [
+      {
+        firstName: 'Emily',
+        lastName: 'Clark',
+        email: 'emily.c@smail.com',
+        password:
+          '$2b$10$GPR6k.aOvF4b7K7CSxCHvu5w7JuYBCRMTOf1e02qUQeSp49Hh4q9m', // student@456
+        role: 'STUDENT',
+      },
+      {
+        firstName: 'Liam',
+        lastName: 'Brown',
+        email: 'liam.b@smail.com',
+        password:
+          '$2b$10$nw9vPyTdvU5v3QDKDwXcduDzq4UOoClDL8Be1Ly0Zs0gYqYtP0LIq', // student@789
+        role: 'STUDENT',
+      },
+      {
+        firstName: 'Sophia',
+        lastName: 'Williams',
+        email: 'sophia.w@smail.com',
+        password:
+          '$2b$10$y3/WiFsvZxIUbHbfDKI/OOBVxPSvD9Yh5rZBCM0lXxO1vxoPKklrq', // pass@stu1
+        role: 'STUDENT',
+      },
+      {
+        firstName: 'Noah',
+        lastName: 'Taylor',
+        email: 'noah.t@smail.com',
+        password:
+          '$2b$10$e4QjvwXR9U3yMI7cQ3mlguu4xu9EMJgLbFfuIK.mMo5k5AzVo6Mbe', // pass@stu2
+        role: 'STUDENT',
+      },
+    ],
+  });
+
+  const enroll = await prisma.enrollment.createMany({
+    data: [
+      {
+        userId: 2,
+        courseId: 1,
+      },
+      {
+        userId: 2,
+        courseId: 2,
+      },
+      {
+        userId: 2,
+        courseId: 3,
+      },
+      {
+        userId: 3,
+        courseId: 3,
+      },
+      {
+        userId: 3,
+        courseId: 4,
+      },
+    ],
+  });
+
+  console.log('upsert', upsert, upsert2, courses, users, enroll);
 }
 
 main()
