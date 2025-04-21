@@ -71,7 +71,7 @@ const CourseDetailPage = () => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  backgroundColor: "#ea80fc",
+                  backgroundColor: "#1a237e",
                 }}
               >
                 <AutoStoriesIcon sx={{ fontSize: 60, color: "white" }} />
