@@ -79,7 +79,7 @@ The application will be available at http://localhost:5173 with backend API at h
 ## Backend (.env)
 
 ```bash
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname" # Replace user to your username, password to your db password, dbname to your db name
 ```
 
 ## Frontend (.env)
