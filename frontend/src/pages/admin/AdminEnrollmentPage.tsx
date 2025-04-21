@@ -6,8 +6,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import CommonBodyLayout from "../../components/CommonBodyLayout";
-import { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
-import CommonDataTable from "../../components/CommonDataTable";
+import { GridPaginationModel } from "@mui/x-data-grid";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../store";
 import React, { useEffect, useState } from "react";
@@ -25,6 +24,8 @@ import {
   selectIsEnrollmentModalOpen,
 } from "../../store/slices/enrollment.slice";
 import EnrollmentFormModal from "../forms/EnrollmentFormModal";
+import { Column, Enrollment } from "../../types";
+import CommonTable from "../../components/CommonTable";
 
 const AdminEnrollmentPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -55,7 +56,7 @@ const AdminEnrollmentPage = () => {
     );
   }, [dispatch, paginationModel]);
 
-  const handleEdit = (id: number) => {
+  /* const handleEdit = (id: number) => {
     console.log("id", id);
     dispatch(getEnrollment({ userId: id.toString() })).then(() => {
       dispatch({
@@ -67,7 +68,7 @@ const AdminEnrollmentPage = () => {
         payload: true,
       });
     });
-  };
+  }; */
 
   const handleDelete = (id: number) => {
     console.log("id", id);
@@ -112,7 +113,7 @@ const AdminEnrollmentPage = () => {
     setOpen(openModal);
   }, [openModal]);
 
-  const columns: GridColDef[] = [
+  /* const columns: GridColDef[] = [
     { field: "courseName", headerName: "Course name", width: 130 },
     { field: "studentName", headerName: "Student name", width: 130 },
     {
@@ -148,6 +149,50 @@ const AdminEnrollmentPage = () => {
         </Box>
       ),
     },
+  ]; */
+
+  const columns: Column<Enrollment>[] = [
+    {
+      id: "courseName",
+      label: "Course name",
+      minWidth: 130,
+    },
+    {
+      id: "studentName",
+      label: "Student name",
+      minWidth: 130,
+    },
+    {
+      id: "duration",
+      label: "Duration",
+      minWidth: 120,
+      align: "center",
+    },
+    {
+      id: "price",
+      label: "Course Amount",
+      minWidth: 160,
+      align: "center",
+    },
+    {
+      id: "id", // or userId depending on your logic
+      label: "Action",
+      minWidth: 200,
+      align: "right",
+      format: (value, row) => (
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
+        >
+          <IconButton color="primary">
+            {/* onClick={() => handleEdit(row.id)} */}
+            <EditIcon />
+          </IconButton>
+          <IconButton color="error" onClick={() => handleDelete(row.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      ),
+    },
   ];
 
   return (
@@ -160,7 +205,7 @@ const AdminEnrollmentPage = () => {
           Enroll Student
         </Button>
       </Box>
-      <CommonDataTable
+      {/* <CommonDataTable
         columns={columns}
         rows={enrollments}
         paginationModel={paginationModel}
@@ -168,6 +213,21 @@ const AdminEnrollmentPage = () => {
         checkboxSelection={false}
         loading={status === "loading"}
         rowCount={totalPages * paginationModel.pageSize}
+      /> */}
+
+      <CommonTable
+        columns={columns}
+        rows={enrollments}
+        totalCount={totalPages * paginationModel.pageSize}
+        page={paginationModel.page}
+        rowsPerPage={paginationModel.pageSize}
+        onPageChange={(newPage) =>
+          setPaginationModel((prev) => ({ ...prev, page: newPage }))
+        }
+        onRowsPerPageChange={(newRowsPerPage) =>
+          setPaginationModel((prev) => ({ ...prev, pageSize: newRowsPerPage }))
+        }
+        loading={status === "loading"}
       />
 
       {/* Course Modal */}

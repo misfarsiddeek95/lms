@@ -8,8 +8,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import CommonBodyLayout from "../../components/CommonBodyLayout";
-import { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
-import CommonDataTable from "../../components/CommonDataTable";
+import { GridPaginationModel } from "@mui/x-data-grid";
+// import CommonDataTable from "../../components/CommonDataTable";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../store";
 import React, { useEffect, useRef, useState } from "react";
@@ -28,6 +28,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CourseFormModal from "../forms/CourseFormModal";
 import { useTheme } from "@mui/material/styles";
 import ConfirmationPopup from "../../components/ConformationPopup";
+import { Column, Course } from "../../types";
+import CommonTable from "../../components/CommonTable";
 
 const PublishSwitch = React.memo(
   ({
@@ -136,7 +138,7 @@ const AdminCoursesPage = () => {
     setOpen(openModal);
   }, [openModal]);
 
-  const columns: GridColDef[] = [
+  /* const columns: GridColDef[] = [
     { field: "name", headerName: "Course name", width: 130 },
     { field: "description", headerName: "Description", width: 130 },
     {
@@ -192,8 +194,77 @@ const AdminCoursesPage = () => {
         </Box>
       ),
     },
-  ];
+  ]; */
 
+  const columns: Column<Course>[] = [
+    {
+      id: "name",
+      label: "Course name",
+      minWidth: 130,
+    },
+    {
+      id: "description",
+      label: "Description",
+      minWidth: 130,
+    },
+    {
+      id: "duration",
+      label: "Duration",
+      minWidth: 120,
+      align: "center",
+    },
+    {
+      id: "price",
+      label: "Course Amount",
+      minWidth: 160,
+      align: "center",
+      format: (value, row) => {
+        const currency = row.currency || "USD";
+        const price = parseFloat(value as string);
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency,
+        }).format(price);
+      },
+    },
+    {
+      id: "isPublished",
+      label: "Active Status",
+      minWidth: 160,
+      align: "center",
+      format: (value, row) => (
+        <PublishSwitch
+          id={row.id}
+          checked={value as boolean}
+          onToggle={handleSwitch}
+        />
+      ),
+    },
+    {
+      id: "id", // assuming 'id' is used for actions
+      label: "Action",
+      minWidth: 200,
+      align: "right",
+      format: (value) => (
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
+        >
+          <IconButton
+            color="primary"
+            onClick={() => handleEdit(value as number)}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete(value as number)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      ),
+    },
+  ];
   return (
     <CommonBodyLayout>
       <Typography variant="h4" gutterBottom>
@@ -204,7 +275,7 @@ const AdminCoursesPage = () => {
           ADD Course
         </Button>
       </Box>
-      <CommonDataTable
+      {/* <CommonDataTable
         columns={columns}
         rows={courses}
         paginationModel={paginationModel}
@@ -212,6 +283,21 @@ const AdminCoursesPage = () => {
         checkboxSelection={false}
         loading={status === "loading"}
         rowCount={totalPages * paginationModel.pageSize}
+      /> */}
+
+      <CommonTable
+        columns={columns}
+        rows={courses}
+        totalCount={totalPages * paginationModel.pageSize}
+        page={paginationModel.page}
+        rowsPerPage={paginationModel.pageSize}
+        onPageChange={(newPage) =>
+          setPaginationModel((prev) => ({ ...prev, page: newPage }))
+        }
+        onRowsPerPageChange={(newRowsPerPage) =>
+          setPaginationModel((prev) => ({ ...prev, pageSize: newRowsPerPage }))
+        }
+        loading={status === "loading"}
       />
 
       {/* Course Modal */}

@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface Course {
   id: number;
   name: string;
@@ -54,4 +56,12 @@ export interface Enrollment {
 export interface createEnrollmentObj {
   userId: number;
   courseIds: number[];
+}
+
+export interface Column<T> {
+  id: keyof T;
+  label: string;
+  minWidth?: number;
+  align?: "right" | "left" | "center";
+  format?: (value: T[keyof T], row: T) => ReactNode;
 }
