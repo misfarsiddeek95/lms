@@ -38,38 +38,52 @@ project/
 
 ## Set up backend
 
+```bash
 cd backend
 npm install
 cp .env.example .env # Update with your credentials
+```
 
+```bash
 npx prisma migrate dev
 npx prisma generate
 npx prisma db seed
+```
 
 ## Set up frontend
 
+```bash
 cd frontend
 npm install
 cp .env.example .env # Update API endpoints
+```
 
 ## Running the Application
 
 ## Start backend server:
 
+```bash
 cd backend
 npm run start:dev
+```
 
 ## Start frontend development server (in a new terminal):
 
+```bash
 cd frontend
 npm run dev
+```
 
 The application will be available at http://localhost:5173 with backend API at http://localhost:3000.
 
 ## Backend (.env)
 
+```bash
 DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+```
 
 ## Frontend (.env)
 
+```bash
 VITE_API_URL=http://localhost:3000/api/
+```
