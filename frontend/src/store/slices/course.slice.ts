@@ -3,6 +3,7 @@ import {
   PayloadAction,
   createAsyncThunk,
   createSelector,
+  createAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import axios from "axios";
@@ -25,6 +26,8 @@ interface CourseState {
   page: number;
   totalPages: number;
   courseDetail: Course | null;
+  isModalOpen: boolean;
+  isEdit: boolean;
 }
 
 const initialState: CourseState = {
@@ -35,11 +38,47 @@ const initialState: CourseState = {
   page: 0,
   totalPages: 0,
   courseDetail: null,
+  isModalOpen: false,
+  isEdit: false,
 };
 
 const token = localStorage.getItem("token");
 
 // Async Thunks
+
+export const createOrUpdateCourse = createAsyncThunk<
+  Course,
+  Partial<Course>,
+  { rejectValue: string }
+>(
+  "courses/createOrUpdateCourse",
+  async (courseData, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}courses/create-or-update-course`,
+        courseData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Adding Bearer token to headers
+          },
+        }
+      );
+      dispatch(fetchCoursesAdmin({ page: 1, limit: COURSES_LIST_COUNT }));
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.message?.message ||
+          error.response?.data?.message ||
+          "Register issue";
+        return rejectWithValue(message);
+      } else {
+        return rejectWithValue("An unknown error occurred");
+      }
+    }
+  }
+);
+
 export const fetchCourses = createAsyncThunk<
   CourseResponse,
   { page?: number; limit?: number; search?: string }
@@ -94,6 +133,37 @@ export const fetchCoursesAdmin = createAsyncThunk<
   }
 );
 
+export const deleteCourse = createAsyncThunk(
+  `courses/deleteCourse`,
+  async ({ id }: { id: string }) => {
+    const response = await axios.delete(
+      `${import.meta.env.VITE_API_URL}courses/delete-course/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }
+);
+
+// action
+export const openCourseModal = createAction(
+  `courses/openCourseModal`,
+  (data: boolean) => {
+    return {
+      payload: data,
+    };
+  }
+);
+
+export const isEdit = createAction(`courses/isEdit`, (data: boolean) => {
+  return {
+    payload: data,
+  };
+});
+
 const courseSlice = createSlice({
   name: COURSE_FEATURE_KEY,
   initialState,
@@ -104,6 +174,15 @@ const courseSlice = createSlice({
     resetCourseStatus(state) {
       state.status = "idle";
       state.error = null;
+    },
+    openCourseModal: (state, action: PayloadAction<boolean>) => {
+      state.isModalOpen = action.payload;
+    },
+    isEdit: (state, action: PayloadAction<boolean>) => {
+      state.isEdit = action.payload;
+      if (!action.payload) {
+        state.courseDetail = null;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -178,6 +257,20 @@ const courseSlice = createSlice({
       .addCase(fetchCoursesAdmin.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message || "Failed to fetch courses";
+      })
+      // delete course
+      .addCase(deleteCourse.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteCourse.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.courses = state.courses.filter(
+          (coourse) => coourse.id !== action.payload.id
+        );
+      })
+      .addCase(deleteCourse.rejected, (state) => {
+        state.status = "failed";
+        state.error = "Failed to delete user";
       });
   },
 });
@@ -200,5 +293,10 @@ export const selectCourseDetail = createSelector(
 
 // Actions
 export const { clearCurrentCourse, resetCourseStatus } = courseSlice.actions;
+
+export const selectCourseError = (state: RootState) => state.courses.error;
+export const selectIsCourseModalOpen = (state: RootState) =>
+  state.courses.isModalOpen;
+export const selectIsCouserEdit = (state: RootState) => state.courses.isEdit;
 
 export default courseSlice.reducer;

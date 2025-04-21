@@ -38,8 +38,6 @@ const StudentFormModal = ({
   const error = useSelector(selectUserError);
   const selectedStudent = useSelector(selectStudentDetail);
 
-  console.log("selectedStudent", selectedStudent);
-
   const isEdit = useSelector(selectIsUserEdit);
 
   const createValidationSchema = (isEdit: boolean) => {

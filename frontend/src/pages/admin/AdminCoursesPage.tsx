@@ -5,6 +5,7 @@ import {
   IconButton,
   Switch,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import CommonBodyLayout from "../../components/CommonBodyLayout";
 import { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
@@ -13,14 +14,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../store";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  deleteCourse,
+  fetchCourseById,
   fetchCoursesAdmin,
   getCourseState,
   selectAllCourses,
+  selectIsCourseModalOpen,
   updatePublishedStatus,
 } from "../../store/slices/course.slice";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CourseFormModal from "../forms/CourseFormModal";
+import { useTheme } from "@mui/material/styles";
+import ConfirmationPopup from "../../components/ConformationPopup";
 
 const PublishSwitch = React.memo(
   ({
@@ -38,6 +45,14 @@ const PublishSwitch = React.memo(
 
 const AdminCoursesPage = () => {
   const dispatch = useDispatch<AppDispatch>();
+
+  const [open, setOpen] = React.useState(false);
+  const [deletePopup, setDeletePopup] = useState(false);
+  const [courseId, setCourseId] = useState<number | null>(null);
+  const openModal = useSelector(selectIsCourseModalOpen);
+
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const courses = useSelector(selectAllCourses);
   const { status, totalPages } = useSelector(getCourseState);
@@ -57,26 +72,69 @@ const AdminCoursesPage = () => {
   }, [dispatch, paginationModel]);
 
   const handleEdit = (id: number) => {
-    console.log("Edit clicked", id);
-    // your edit logic id
+    dispatch(fetchCourseById({ id: id.toString() })).then(() => {
+      dispatch({
+        type: "courses/openCourseModal",
+        payload: true,
+      });
+      dispatch({
+        type: "courses/isEdit",
+        payload: true,
+      });
+    });
   };
 
   const handleDelete = (id: number) => {
-    console.log("Delete clicked", id);
-    // your delete logic here
+    setDeletePopup(true);
+    setCourseId(id);
+  };
+
+  const handleClosePopup = () => {
+    setDeletePopup(false);
+    setCourseId(null);
+  };
+
+  const handleConfirm = async () => {
+    try {
+      if (courseId) {
+        dispatch(deleteCourse({ id: courseId.toString() }));
+      }
+    } catch (error) {
+      console.error("API error:", error);
+    } finally {
+      handleClosePopup(); // Close the dialog after API call
+    }
   };
 
   const debouncedToggle = useRef(
     debounce((id, isPublished) => {
       dispatch(updatePublishedStatus({ id, isPublished }));
-      console.log("id", id);
-      console.log("isPublished", isPublished);
     }, 300)
   ).current;
 
   const handleSwitch = (id: number, value: boolean) => {
     debouncedToggle(id, value);
   };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    dispatch({
+      type: "courses/openCourseModal",
+      payload: false,
+    });
+    dispatch({
+      type: "courses/isEdit",
+      payload: false,
+    });
+  };
+
+  useEffect(() => {
+    setOpen(openModal);
+  }, [openModal]);
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Course name", width: 130 },
@@ -142,7 +200,7 @@ const AdminCoursesPage = () => {
         Course List
       </Typography>
       <Box sx={{ mb: 1, display: "flex", justifyContent: "flex-end" }}>
-        <Button variant="outlined" size="small">
+        <Button variant="outlined" size="small" onClick={handleClickOpen}>
           ADD Course
         </Button>
       </Box>
@@ -154,6 +212,22 @@ const AdminCoursesPage = () => {
         checkboxSelection={false}
         loading={status === "loading"}
         rowCount={totalPages * paginationModel.pageSize}
+      />
+
+      {/* Course Modal */}
+      <CourseFormModal
+        open={open}
+        fullscreen={fullScreen}
+        handleClose={handleClose}
+      />
+
+      {/* Delete confirmation */}
+      <ConfirmationPopup
+        title="Are you sure?"
+        description="Do you really want to perform this action?"
+        open={deletePopup}
+        handleClose={handleClosePopup}
+        onConfirm={handleConfirm}
       />
     </CommonBodyLayout>
   );

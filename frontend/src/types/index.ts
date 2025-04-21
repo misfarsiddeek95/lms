@@ -5,6 +5,7 @@ export interface Course {
   duration: string;
   price: string;
   currency: string;
+  isPublished?: boolean;
 }
 
 interface CourseForCollapse {
