@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
+import { UpdateCourseDto, UpdatePublishDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -108,5 +108,44 @@ export class CoursesService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async updatePublished(data: UpdatePublishDto) {
+    try {
+      const exists = await this.prisma.course.findUnique({
+        where: { id: data.id },
+      });
+      if (!exists) {
+        throw new NotFoundException('Course not found for given ID');
+      }
+      return await this.prisma.course.update({
+        where: {
+          id: data.id,
+        },
+        data: {
+          isPublished: data.isPublished,
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async fetchAllCoursesAdmin({ page, limit }: { page: number; limit: number }) {
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.course.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.course.count(),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }

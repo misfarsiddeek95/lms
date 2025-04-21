@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
+import { UpdateCourseDto, UpdatePublishDto } from './dto/update-course.dto';
 import { JwtGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Role } from '@prisma/client';
@@ -232,5 +232,43 @@ export class CoursesController {
   })
   remove(@Param('id') id: string) {
     return this.coursesService.remove(+id);
+  }
+
+  @Patch('update-published')
+  updatePublished(@Body() data: UpdatePublishDto) {
+    return this.coursesService.updatePublished(data);
+  }
+
+  @Get('fetch-all-courses-admin')
+  @ApiOperation({ summary: 'Fetch all courses (admin)' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all available courses',
+    schema: {
+      example: [
+        {
+          id: 1,
+          name: 'Intro to JS',
+          description: 'JavaScript basics for beginners.',
+          duration: '2 Months',
+          price: '149.99',
+          currency: 'USD',
+          isPublished: true,
+          createdAt: '2025-04-19T22:00:00.000Z',
+          updatedAt: '2025-04-19T22:00:00.000Z',
+        },
+      ],
+    },
+  })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  fetchAllCoursesAdmin(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 8,
+  ) {
+    return this.coursesService.fetchAllCoursesAdmin({
+      page: +page,
+      limit: +limit,
+    });
   }
 }

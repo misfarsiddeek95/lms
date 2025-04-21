@@ -22,7 +22,7 @@ const CommonDataTable = <T extends { id: string | number }>({
   rowCount,
 }: CommonDataTableProps<T>) => {
   return (
-    <Paper sx={{ height: 370, width: "100%" }}>
+    <Paper sx={{ height: 500, width: "100%" }}>
       <DataGrid
         sx={{
           border: 0,

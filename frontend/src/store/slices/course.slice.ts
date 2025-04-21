@@ -37,6 +37,8 @@ const initialState: CourseState = {
   courseDetail: null,
 };
 
+const token = localStorage.getItem("token");
+
 // Async Thunks
 export const fetchCourses = createAsyncThunk<
   CourseResponse,
@@ -62,6 +64,36 @@ export const fetchCourseById = createAsyncThunk(
   }
 );
 
+export const updatePublishedStatus = createAsyncThunk(
+  "courses/updatePublishedStatus",
+  async ({ id, isPublished }: { id: number; isPublished: boolean }) => {
+    const response = await axios.patch(
+      `${import.meta.env.VITE_API_URL}courses/update-published`,
+      { id, isPublished },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Adding Bearer token to headers
+        },
+      }
+    );
+    return response.data;
+  }
+);
+
+export const fetchCoursesAdmin = createAsyncThunk<
+  CourseResponse,
+  { page?: number; limit?: number }
+>(
+  "courses/fetchCoursesAdmin",
+  async ({ page = 1, limit = COURSES_LIST_COUNT }) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}courses/fetch-all-courses-admin`,
+      { params: { page, limit }, headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  }
+);
+
 const courseSlice = createSlice({
   name: COURSE_FEATURE_KEY,
   initialState,
@@ -76,7 +108,7 @@ const courseSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all courses
+      // Fetch all courses public
       .addCase(fetchCourses.pending, (state) => {
         state.status = "loading";
       })
@@ -108,6 +140,44 @@ const courseSlice = createSlice({
       .addCase(fetchCourseById.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message || "Failed to fetch course detail";
+      })
+
+      // update course
+      .addCase(updatePublishedStatus.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(
+        updatePublishedStatus.fulfilled,
+        (state, action: PayloadAction<Course>) => {
+          state.status = "succeeded";
+          state.courses = state.courses.map((course) =>
+            course.id === action.payload.id
+              ? { ...course, ...action.payload }
+              : course
+          );
+        }
+      )
+      .addCase(updatePublishedStatus.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message || "Failed to fetch courses";
+      })
+
+      // fetch all course admin
+      .addCase(fetchCoursesAdmin.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(
+        fetchCoursesAdmin.fulfilled,
+        (state, action: PayloadAction<CourseResponse>) => {
+          state.status = "succeeded";
+          state.courses = action.payload.data;
+          state.page = action.payload.page;
+          state.totalPages = action.payload.totalPages;
+        }
+      )
+      .addCase(fetchCoursesAdmin.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message || "Failed to fetch courses";
       });
   },
 });
