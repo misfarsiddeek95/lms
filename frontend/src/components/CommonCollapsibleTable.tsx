@@ -53,166 +53,158 @@ interface CommonCollapsibleTableProps {
   students: Student[];
 }
 
-const StudentRow = React.memo(
-  ({ student }: { student: Student }) => {
-    const dispatch = useDispatch<AppDispatch>();
-    const [open, setOpen] = React.useState(false);
-    const [switchStatus, setSwitchStatus] = useState(student.isActive);
+const StudentRow = ({ student }: { student: Student }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const [open, setOpen] = React.useState(false);
+  const [switchStatus, setSwitchStatus] = useState(student.isActive);
 
-    const [deletePopup, setDeletePopup] = useState(false);
-    const [studentId, setStudentId] = useState<number | null>(null);
+  const [deletePopup, setDeletePopup] = useState(false);
+  const [studentId, setStudentId] = useState<number | null>(null);
 
-    const [selectedUserId, setSelectedUserId] = useState<number>();
+  const [selectedUserId, setSelectedUserId] = useState<number>();
 
-    const label = { inputProps: { "aria-label": "Color switch demo" } };
+  const label = { inputProps: { "aria-label": "Color switch demo" } };
 
-    const handleEdit = ({ id }: { id: number }) => {
-      dispatch(fetchUserById({ id: id.toString() })).then(() => {
-        dispatch({
-          type: "users/openUserModal",
-          payload: true,
-        });
-        dispatch({
-          type: "users/isEdit",
-          payload: true,
-        });
+  const handleEdit = ({ id }: { id: number }) => {
+    dispatch(fetchUserById({ id: id.toString() })).then(() => {
+      dispatch({
+        type: "users/openUserModal",
+        payload: true,
       });
-    };
+      dispatch({
+        type: "users/isEdit",
+        payload: true,
+      });
+    });
+  };
 
-    const handleDelete = ({ id }: { id: number }) => {
-      setDeletePopup(true);
-      setStudentId(id);
-    };
+  const handleDelete = ({ id }: { id: number }) => {
+    setDeletePopup(true);
+    setStudentId(id);
+  };
 
-    const handleClosePopup = () => {
-      setDeletePopup(false);
-      setStudentId(null);
-    };
+  const handleClosePopup = () => {
+    setDeletePopup(false);
+    setStudentId(null);
+  };
 
-    const handleConfirm = async () => {
-      try {
-        if (studentId) {
-          dispatch(deleteUser({ id: studentId.toString() }));
-        }
-      } catch (error) {
-        console.error("API error:", error);
-      } finally {
-        handleClosePopup(); // Close the dialog after API call
+  const handleConfirm = async () => {
+    try {
+      if (studentId) {
+        dispatch(deleteUser({ id: studentId.toString() }));
       }
-    };
+    } catch (error) {
+      console.error("API error:", error);
+    } finally {
+      handleClosePopup(); // Close the dialog after API call
+    }
+  };
 
-    useEffect(() => {
-      if (selectedUserId !== undefined) {
-        dispatch(updateUser({ id: selectedUserId, isActive: switchStatus }));
-      }
-    }, [switchStatus, selectedUserId, dispatch]);
+  useEffect(() => {
+    if (selectedUserId !== undefined) {
+      dispatch(updateUser({ id: selectedUserId, isActive: switchStatus }));
+    }
+  }, [switchStatus, selectedUserId, dispatch]);
 
-    return (
-      <>
-        <TableRow>
-          <TableCell>
-            <IconButton size="small" onClick={() => setOpen(!open)}>
-              {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-            </IconButton>
-          </TableCell>
-          <TableCell>{student.firstName}</TableCell>
-          <TableCell>{student.lastName}</TableCell>
-          <TableCell>{student.email}</TableCell>
-          <TableCell>
-            <Switch
-              {...label}
-              checked={switchStatus}
-              onChange={(e) => {
-                setSwitchStatus(e.target.checked);
-                setSelectedUserId(student.id);
-              }}
-            />
-          </TableCell>
-          <TableCell align="center">
-            {student?.courses && student.courses.length > 0 ? (
-              <CheckCircleIcon color="success" />
-            ) : (
-              <CancelIcon color="error" />
-            )}
-          </TableCell>
-          <TableCell align="right">
-            <IconButton
-              color="primary"
-              onClick={() => handleEdit({ id: +student.id })}
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              color="error"
-              onClick={() => handleDelete({ id: +student.id })}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell colSpan={7} sx={{ paddingBottom: 0, paddingTop: 0 }}>
-            <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box sx={{ margin: 1 }}>
-                <Typography
-                  variant="subtitle1"
-                  gutterBottom
-                  component="div"
-                  textAlign={"center"}
-                  fontWeight={700}
-                >
-                  Enrolled Courses
-                </Typography>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        Course Name
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        Course Duration
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        Enrolled Date
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600 }}>
-                        Fee ($)
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {student.courses &&
-                      student.courses.map((course) => (
-                        <TableRow key={course.courseId}>
-                          <TableCell>{course.courseName}</TableCell>
-                          <TableCell>{course.duration}</TableCell>
-                          <TableCell>{course.enrolledDate}</TableCell>
-                          <TableCell align="right">{course.fee}</TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </Box>
-            </Collapse>
-          </TableCell>
-        </TableRow>
+  return (
+    <>
+      <TableRow>
+        <TableCell>
+          <IconButton size="small" onClick={() => setOpen(!open)}>
+            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+          </IconButton>
+        </TableCell>
+        <TableCell>{student.firstName}</TableCell>
+        <TableCell>{student.lastName}</TableCell>
+        <TableCell>{student.email}</TableCell>
+        <TableCell>
+          <Switch
+            {...label}
+            checked={switchStatus}
+            onChange={(e) => {
+              setSwitchStatus(e.target.checked);
+              setSelectedUserId(student.id);
+            }}
+          />
+        </TableCell>
+        <TableCell align="center">
+          {student?.courses && student.courses.length > 0 ? (
+            <CheckCircleIcon color="success" />
+          ) : (
+            <CancelIcon color="error" />
+          )}
+        </TableCell>
+        <TableCell align="right">
+          <IconButton
+            color="primary"
+            onClick={() => handleEdit({ id: +student.id })}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete({ id: +student.id })}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell colSpan={7} sx={{ paddingBottom: 0, paddingTop: 0 }}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Typography
+                variant="subtitle1"
+                gutterBottom
+                component="div"
+                textAlign={"center"}
+                fontWeight={700}
+              >
+                Enrolled Courses
+              </Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Course Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      Course Duration
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      Enrolled Date
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>
+                      Fee ($)
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {student.courses &&
+                    student.courses.map((course) => (
+                      <TableRow key={course.courseId}>
+                        <TableCell>{course.courseName}</TableCell>
+                        <TableCell>{course.duration}</TableCell>
+                        <TableCell>{course.enrolledDate}</TableCell>
+                        <TableCell align="right">{course.fee}</TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
 
-        {/* Delete confirmation */}
-        <ConfirmationPopup
-          title="Are you sure?"
-          description="Do you really want to perform this action?"
-          open={deletePopup}
-          handleClose={handleClosePopup}
-          onConfirm={handleConfirm}
-        />
-      </>
-    );
-  },
-  (prevProps, nextProps) => {
-    // Only re-render if student data has changed
-    return prevProps.student.isActive === nextProps.student.isActive;
-  }
-);
+      {/* Delete confirmation */}
+      <ConfirmationPopup
+        title="Are you sure?"
+        description="Do you really want to perform this action?"
+        open={deletePopup}
+        handleClose={handleClosePopup}
+        onConfirm={handleConfirm}
+      />
+    </>
+  );
+};
 
 export default function CommonCollapsibleTable({
   students,
