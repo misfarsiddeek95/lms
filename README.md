@@ -4,6 +4,7 @@ A full-stack application with NestJS backend and React/Vite frontend.
 
 ## Project Structure
 
+```base
 project/
 ├── backend/ # NestJS backend application
 │ ├── dist/ # Compiled files
@@ -20,6 +21,7 @@ project/
 ├── .env # Environment variables
 ├── package.json # Frontend dependencies
 └── ... # Other configuration files
+```
 
 ## Prerequisites
 
