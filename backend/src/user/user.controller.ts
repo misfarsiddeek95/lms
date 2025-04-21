@@ -27,6 +27,7 @@ import {
   ApiParam,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 
@@ -39,6 +40,50 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('fetch-students')
+  @ApiOperation({
+    summary: 'Fetch paginated list of students',
+    description: 'Retrieve a paginated list of users with the STUDENT role',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number for pagination',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 8,
+    description: 'Number of results per page',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully fetched student list',
+    schema: {
+      example: {
+        currentPage: 1,
+        totalPages: 2,
+        totalCount: 12,
+        students: [
+          {
+            id: 1,
+            email: 'student1@example.com',
+            firstName: 'John',
+            lastName: 'Doe',
+            role: 'STUDENT',
+          },
+        ],
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Missing or invalid token',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - Only admins are allowed to access this route',
+  })
   fetchStudents(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 8,
@@ -188,6 +233,38 @@ export class UserController {
   }
 
   @Get('search-students')
+  @ApiOperation({
+    summary: 'Search students',
+    description: 'Search for students by name, email, or other keywords',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: true,
+    type: String,
+    example: 'john',
+    description: 'Search term to filter student users',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Matching student records returned',
+    schema: {
+      example: [
+        {
+          id: 5,
+          email: 'john.doe@example.com',
+          firstName: 'John',
+          lastName: 'Doe',
+          role: 'STUDENT',
+        },
+      ],
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Missing or invalid token',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - Only admins are allowed to search students',
+  })
   async searchStudent(@Query('search') search: string) {
     return this.userService.searchStudent({ search });
   }

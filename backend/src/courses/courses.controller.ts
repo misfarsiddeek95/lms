@@ -235,6 +235,42 @@ export class CoursesController {
   }
 
   @Patch('update-published')
+  @ApiOperation({ summary: 'Update course publish status' })
+  @ApiBody({
+    type: UpdatePublishDto,
+    description: 'Payload to update course published status',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Course publish status updated successfully',
+    schema: {
+      example: {
+        id: 3,
+        isPublished: true,
+        updatedAt: '2025-04-20T10:25:14.000Z',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing token',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - Admin role required',
+    schema: {
+      example: {
+        statusCode: 403,
+        message: 'You do not have permission to access this resource',
+        error: 'Forbidden',
+      },
+    },
+  })
   updatePublished(@Body() data: UpdatePublishDto) {
     return this.coursesService.updatePublished(data);
   }
@@ -273,6 +309,32 @@ export class CoursesController {
   }
 
   @Get('search-courses')
+  @Public()
+  @ApiOperation({ summary: 'Search published courses by keyword and user ID' })
+  @ApiQuery({
+    name: 'search',
+    required: true,
+    description: 'Search term or keyword',
+  })
+  @ApiQuery({
+    name: 'userId',
+    required: true,
+    description: 'User ID to tailor results',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of matching courses',
+    schema: {
+      example: [
+        {
+          id: 12,
+          name: 'Advanced Node.js',
+          description: 'Deep dive into Node.js with practical projects',
+          isPublished: true,
+        },
+      ],
+    },
+  })
   searchCourses(
     @Query('search') search: string,
     @Query('userId') userId: string,
@@ -285,6 +347,34 @@ export class CoursesController {
 
   @Roles(Role.STUDENT)
   @Get('my-courses/:id')
+  @ApiOperation({ summary: 'Get all courses enrolled by a student' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Student User ID',
+    example: 25,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of enrolled courses for the student',
+    schema: {
+      example: [
+        {
+          id: 8,
+          name: 'Vue.js Essentials',
+          description: 'Core Vue.js concepts and real-world usage',
+          isPublished: true,
+          enrolledAt: '2025-04-18T14:00:00.000Z',
+        },
+      ],
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing token',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - Only accessible by students',
+  })
   loadMyCourses(@Param('id') id: string) {
     return this.coursesService.loadMyCourses(+id);
   }

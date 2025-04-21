@@ -27,6 +27,8 @@ import {
   ApiForbiddenResponse,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 
@@ -205,6 +207,45 @@ export class EnrollmentController {
   }
 
   @Get('list-all-enrollments')
+  @ApiOperation({
+    summary: 'List all enrollments',
+    description:
+      'Retrieve a paginated list of all enrollments. Only accessible by admins.',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 8 })
+  @ApiOkResponse({
+    description: 'Successfully fetched enrollment list',
+    schema: {
+      example: {
+        currentPage: 1,
+        totalPages: 3,
+        totalCount: 24,
+        enrollments: [
+          {
+            id: 1,
+            userId: 5,
+            courseId: 2,
+            enrolledAt: '2025-04-19T20:14:33.000Z',
+            course: {
+              id: 2,
+              name: 'JavaScript Basics',
+            },
+            user: {
+              id: 5,
+              email: 'test@example.com',
+            },
+          },
+        ],
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Missing or invalid token',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - Only admins are allowed to list all enrollments',
+  })
   async listEnrollments(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 8,
@@ -216,6 +257,44 @@ export class EnrollmentController {
   }
 
   @Public()
+  @ApiOperation({
+    summary: 'Get enrollments by user ID',
+    description:
+      'Fetch all enrollments for a specific user by their user ID. Publicly accessible.',
+  })
+  @ApiParam({
+    name: 'userId',
+    required: true,
+    type: Number,
+    example: 10,
+    description: 'The user ID whose enrollments should be fetched',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched enrollments for the given user ID',
+    schema: {
+      example: [
+        {
+          id: 12,
+          userId: 10,
+          courseId: 4,
+          enrolledAt: '2025-04-20T01:09:47.407Z',
+          course: {
+            name: 'Advanced React',
+          },
+        },
+      ],
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found or no enrollments available',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'No enrollments found for user ID 10',
+        error: 'Not Found',
+      },
+    },
+  })
   @Get('get-enrollment-by-id/:userId')
   async getEnrollmentById(@Param('userId') userId: string) {
     return this.enrollmentService.getEnrollmentById(+userId);
