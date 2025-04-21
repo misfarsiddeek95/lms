@@ -7,7 +7,7 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -174,5 +174,47 @@ export class UserService {
     return Object.fromEntries(
       Object.entries(obj).filter(([_, v]) => v !== undefined),
     ) as Partial<T>;
+  }
+
+  async searchStudent({ search }: { search: string }) {
+    try {
+      const users = await this.prisma.user.findMany({
+        where: {
+          role: 'STUDENT', // Only students
+          isActive: true,
+          OR: [
+            {
+              firstName: {
+                contains: search,
+                mode: Prisma.QueryMode.insensitive, // Case-insensitive match
+              },
+            },
+            {
+              lastName: {
+                contains: search,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+        orderBy: {
+          firstName: 'asc',
+        },
+      });
+
+      // Optional: Combine firstName + lastName for easier use in frontend
+      return users.map((user) => ({
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+      }));
+    } catch (error) {
+      console.error('Error searching students:', error);
+      throw error;
+    }
   }
 }

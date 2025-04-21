@@ -17,6 +17,7 @@ import theme from "../theme/theme";
 import { Provider } from "react-redux";
 import { store } from "../store";
 import GuestRoute from "../components/GuestRoute";
+import AdminEnrollmentPage from "../pages/admin/AdminEnrollmentPage";
 
 function App() {
   return (
@@ -60,6 +61,10 @@ function App() {
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/admin/courses" element={<AdminCoursesPage />} />
               <Route path="/admin/students" element={<AdminStudentsPage />} />
+              <Route
+                path="/admin/enrollments"
+                element={<AdminEnrollmentPage />}
+              />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

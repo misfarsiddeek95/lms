@@ -13,8 +13,10 @@ import { STUDENT_LIST_COUNT } from "../../constants";
 
 export const USER_FEATURE_KEY = "users";
 
-// User type
-
+type SearchUser = {
+  id: number;
+  name: string;
+};
 // State interface
 interface UserState {
   users: User[];
@@ -28,6 +30,7 @@ interface UserState {
   studentDetail: User | null;
   isModalOpen: boolean;
   isEdit: boolean;
+  searchedUsers: SearchUser[];
 }
 
 // Initial state
@@ -43,6 +46,7 @@ const initialState: UserState = {
   studentDetail: null,
   isModalOpen: false,
   isEdit: false,
+  searchedUsers: [],
 };
 
 const token = localStorage.getItem("token");
@@ -169,6 +173,29 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
+export const searchStudents = createAsyncThunk(
+  `${USER_FEATURE_KEY}/searchStudents`,
+  async (search: { search: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}user/search-students`,
+        {
+          params: { search: search.search }, // Explicitly structure params
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return {
+        users: response.data, // Your API returns the array directly
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data || error.message);
+      }
+      return rejectWithValue("Unknown error occurred");
+    }
+  }
+);
+
 // action
 export const openUserModal = createAction(
   `${USER_FEATURE_KEY}/openUserModal`,
@@ -288,6 +315,21 @@ const userSlice = createSlice({
       .addCase(deleteUser.rejected, (state) => {
         state.status = "failed";
         state.error = "Failed to delete user";
+      })
+      // search user
+      .addCase(searchStudents.pending, (state) => {
+        state.status = "loading";
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(searchStudents.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.searchedUsers = action.payload.users;
+      })
+      .addCase(searchStudents.rejected, (state, action) => {
+        state.status = "failed";
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
@@ -324,6 +366,8 @@ export const selectTotalUsers = (state: RootState) => state.users.total;
 export const selectTotalPages = (state: RootState) => state.users.totalPages;
 export const selectIsModalOpen = (state: RootState) => state.users.isModalOpen;
 export const selectIsUserEdit = (state: RootState) => state.users.isEdit;
+export const selectSearchedStudents = (state: RootState) =>
+  state.users.searchedUsers;
 
 // Reducer
 export default userSlice.reducer;

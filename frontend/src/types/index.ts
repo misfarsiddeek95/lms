@@ -41,3 +41,17 @@ export interface RegisterFormDataModal {
   password?: string;
   confirmPassword?: string;
 }
+
+export interface Enrollment {
+  id: number;
+  enrolledAt: Date;
+  studentName: string;
+  courseName: string;
+  price: string;
+  duration: string;
+}
+
+export interface createEnrollmentObj {
+  userId: number;
+  courseIds: number[];
+}

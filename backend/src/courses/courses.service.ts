@@ -148,4 +148,45 @@ export class CoursesService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+  async searchCourses({ search, userId }: { search: string; userId: string }) {
+    try {
+      const enrolledCourses = await this.prisma.enrollment.findMany({
+        where: {
+          userId: Number(userId), // More explicit conversion
+        },
+        select: {
+          courseId: true,
+        },
+      });
+
+      const enrolledCourseIds = enrolledCourses.map(
+        (course) => course.courseId,
+      );
+
+      const courses = await this.prisma.course.findMany({
+        where: {
+          isPublished: true,
+          name: {
+            contains: search.trim(), // Trim whitespace
+            mode: 'insensitive',
+          },
+          ...(enrolledCourseIds.length > 0 && {
+            // Only add exclusion if there are enrolled courses
+            id: {
+              notIn: enrolledCourseIds,
+            },
+          }),
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      return courses;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

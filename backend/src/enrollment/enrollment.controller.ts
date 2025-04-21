@@ -2,8 +2,10 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -26,6 +28,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Enrollments')
 @ApiBearerAuth()
@@ -35,7 +38,8 @@ import {
 export class EnrollmentController {
   constructor(private readonly enrollmentService: EnrollmentService) {}
 
-  @Roles(Role.ADMIN, Role.STUDENT)
+  // @Roles(Role.ADMIN, Role.STUDENT)
+  @Public()
   @Post('create-enrollment')
   @ApiOperation({
     summary: 'Create new enrollments',
@@ -198,5 +202,22 @@ export class EnrollmentController {
   @Delete('remove-enrollment/:id')
   async removeEnrollment(@Param('id') id: number, @Req() request: Request) {
     return this.enrollmentService.removeEntollment(+id, request?.user);
+  }
+
+  @Get('list-all-enrollments')
+  async listEnrollments(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 8,
+  ) {
+    return this.enrollmentService.listEnrollments({
+      page: +page,
+      limit: +limit,
+    });
+  }
+
+  @Public()
+  @Get('get-enrollment-by-id/:userId')
+  async getEnrollmentById(@Param('userId') userId: string) {
+    return this.enrollmentService.getEnrollmentById(+userId);
   }
 }

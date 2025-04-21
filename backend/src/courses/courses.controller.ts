@@ -271,4 +271,15 @@ export class CoursesController {
       limit: +limit,
     });
   }
+
+  @Get('search-courses')
+  searchCourses(
+    @Query('search') search: string,
+    @Query('userId') userId: string,
+  ) {
+    return this.coursesService.searchCourses({
+      search,
+      userId,
+    });
+  }
 }

@@ -170,4 +170,72 @@ export class EnrollmentService {
       throw error;
     }
   }
+
+  async listEnrollments({ page, limit }: { page: number; limit: number }) {
+    try {
+      const [allEnrollments, total] = await this.prisma.$transaction([
+        this.prisma.enrollment.findMany({
+          skip: (page - 1) * limit,
+          take: limit,
+          select: {
+            id: true,
+            enrolledAt: true,
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+            course: {
+              select: {
+                name: true,
+                currency: true,
+                price: true,
+                duration: true,
+              },
+            },
+          },
+        }),
+        this.prisma.course.count(),
+      ]);
+
+      const flatEnrollments = allEnrollments.map((e) => ({
+        id: e.id,
+        enrolledAt: e.enrolledAt,
+        studentName: `${e.user.firstName} ${e.user.lastName}`,
+        courseName: e.course.name,
+        price: `${e.course.currency} ${e.course.price}`,
+        duration: e.course.duration,
+      }));
+
+      return {
+        data: flatEnrollments,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getEnrollmentById(id: number) {
+    try {
+      const enrollment = await this.prisma.enrollment.findMany({
+        where: { userId: id },
+      });
+      if (!enrollment) {
+        throw new NotFoundException('Enrollment not found');
+      }
+
+      const courseIds = enrollment.map((v) => v.courseId);
+
+      return {
+        userId: id,
+        courseId: courseIds,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -186,4 +186,9 @@ export class UserController {
   async deleteUser(@Param('id') id: string, @Req() request: Request) {
     return this.userService.deleteUser(id, request?.user);
   }
+
+  @Get('search-students')
+  async searchStudent(@Query('search') search: string) {
+    return this.userService.searchStudent({ search });
+  }
 }

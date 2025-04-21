@@ -18,6 +18,11 @@ interface CourseResponse {
   totalPages: number;
 }
 
+type SearchedCourse = {
+  id: number;
+  name: string;
+};
+
 interface CourseState {
   courses: Course[];
   currentCourse: Course | null;
@@ -28,6 +33,7 @@ interface CourseState {
   courseDetail: Course | null;
   isModalOpen: boolean;
   isEdit: boolean;
+  searchedCourses: SearchedCourse[];
 }
 
 const initialState: CourseState = {
@@ -40,6 +46,7 @@ const initialState: CourseState = {
   courseDetail: null,
   isModalOpen: false,
   isEdit: false,
+  searchedCourses: [],
 };
 
 const token = localStorage.getItem("token");
@@ -145,6 +152,32 @@ export const deleteCourse = createAsyncThunk(
       }
     );
     return response.data;
+  }
+);
+
+export const searchCourses = createAsyncThunk(
+  `courses/searchCourses`,
+  async (
+    { search, userId }: { search: string; userId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}courses/search-courses`,
+        {
+          params: { search: search, userId: userId }, // Explicitly structure params
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return {
+        courses: response.data, // Your API returns the array directly
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data || error.message);
+      }
+      return rejectWithValue("Unknown error occurred");
+    }
   }
 );
 
@@ -271,6 +304,19 @@ const courseSlice = createSlice({
       .addCase(deleteCourse.rejected, (state) => {
         state.status = "failed";
         state.error = "Failed to delete user";
+      })
+      // search courses
+      .addCase(searchCourses.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(searchCourses.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.searchedCourses = action.payload.courses;
+      })
+      .addCase(searchCourses.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
       });
   },
 });
@@ -298,5 +344,8 @@ export const selectCourseError = (state: RootState) => state.courses.error;
 export const selectIsCourseModalOpen = (state: RootState) =>
   state.courses.isModalOpen;
 export const selectIsCouserEdit = (state: RootState) => state.courses.isEdit;
+
+export const selectSearchedCourses = (state: RootState) =>
+  state.courses.searchedCourses;
 
 export default courseSlice.reducer;
