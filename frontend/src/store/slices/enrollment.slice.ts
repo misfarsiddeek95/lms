@@ -3,6 +3,7 @@ import {
   PayloadAction,
   createSelector,
   createAsyncThunk,
+  createAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import { createEnrollmentObj, Enrollment } from "../../types";
@@ -27,6 +28,7 @@ interface EnrollmentState {
   enrollmentDetail: Enrollment | null;
   isModalOpen: boolean;
   isEdit: boolean;
+  selectedEnrollment: createEnrollmentObj | null;
 }
 
 const initialState: EnrollmentState = {
@@ -39,6 +41,7 @@ const initialState: EnrollmentState = {
   enrollmentDetail: null,
   isModalOpen: false,
   isEdit: false,
+  selectedEnrollment: null,
 };
 
 const token = localStorage.getItem("token");
@@ -87,6 +90,57 @@ export const createEnrollment = createAsyncThunk<
   }
 );
 
+export const getEnrollment = createAsyncThunk(
+  `${ENROLLMENT_FEATURE_KEY}/getEnrollment`,
+  async ({ userId }: { userId: string }) => {
+    const response = await axios.get(
+      `${
+        import.meta.env.VITE_API_URL
+      }enrollment/get-enrollment-by-id/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }
+);
+
+export const deleteEnrollment = createAsyncThunk(
+  `${ENROLLMENT_FEATURE_KEY}/deleteEnrollment`,
+  async ({ id }: { id: string }) => {
+    const response = await axios.delete(
+      `${import.meta.env.VITE_API_URL}enrollment/remove-enrollment/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }
+);
+
+// action
+export const isEdit = createAction(
+  `${ENROLLMENT_FEATURE_KEY}/isEdit`,
+  (data: boolean) => {
+    return {
+      payload: data,
+    };
+  }
+);
+
+export const openEnrollmentModal = createAction(
+  `${ENROLLMENT_FEATURE_KEY}/openEnrollmentModal`,
+  (data: boolean) => {
+    return {
+      payload: data,
+    };
+  }
+);
+
 const enrollmentSlice = createSlice({
   name: ENROLLMENT_FEATURE_KEY,
   initialState,
@@ -104,7 +158,7 @@ const enrollmentSlice = createSlice({
     isEdit: (state, action: PayloadAction<boolean>) => {
       state.isEdit = action.payload;
       if (!action.payload) {
-        state.enrollmentDetail = null;
+        state.selectedEnrollment = null;
       }
     },
   },
@@ -138,6 +192,35 @@ const enrollmentSlice = createSlice({
       .addCase(createEnrollment.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Failed to create user";
+      })
+      // fetch enrollment detail
+      .addCase(getEnrollment.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(
+        getEnrollment.fulfilled,
+        (state, action: PayloadAction<createEnrollmentObj>) => {
+          state.status = "succeeded";
+          state.selectedEnrollment = action.payload;
+        }
+      )
+      .addCase(getEnrollment.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message || "Failed to fetch course detail";
+      })
+      // delete enrollment
+      .addCase(deleteEnrollment.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteEnrollment.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.enrollments = state.enrollments.filter(
+          (enroll) => enroll.id !== action.payload.id
+        );
+      })
+      .addCase(deleteEnrollment.rejected, (state) => {
+        state.status = "failed";
+        state.error = "Failed to delete user";
       });
   },
 });
@@ -156,8 +239,19 @@ export const selectEnrollmentDetail = createSelector(
   (enrollmentState) => enrollmentState.enrollmentDetail
 );
 
+export const selectedEnrollment = createSelector(
+  getEnrollmentState,
+  (enrollmentState) => enrollmentState.selectedEnrollment
+);
+
 // Actions
 export const { clearCurrentEnrollment, resetEnrollmentStatus } =
   enrollmentSlice.actions;
+
+export const selectIsEnrollmentEdit = (state: RootState) =>
+  state.enrollments.isEdit;
+
+export const selectIsEnrollmentModalOpen = (state: RootState) =>
+  state.enrollments.isModalOpen;
 
 export default enrollmentSlice.reducer;

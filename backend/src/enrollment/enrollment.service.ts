@@ -164,8 +164,7 @@ export class EnrollmentService {
         );
       }
 
-      await this.prisma.enrollment.delete({ where: { id: enrollmentId } });
-      return { message: 'Enrollment deleted successfully' };
+      return this.prisma.enrollment.delete({ where: { id: enrollmentId } });
     } catch (error) {
       throw error;
     }
@@ -184,6 +183,7 @@ export class EnrollmentService {
               select: {
                 firstName: true,
                 lastName: true,
+                id: true,
               },
             },
             course: {
@@ -206,6 +206,7 @@ export class EnrollmentService {
         courseName: e.course.name,
         price: `${e.course.currency} ${e.course.price}`,
         duration: e.course.duration,
+        userId: e.user.id,
       }));
 
       return {

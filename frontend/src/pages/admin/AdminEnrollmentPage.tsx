@@ -17,9 +17,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@mui/material/styles";
 import ConfirmationPopup from "../../components/ConformationPopup";
 import {
+  deleteEnrollment,
   fetchAllEnrollments,
+  getEnrollment,
   getEnrollmentState,
   selectAllEnrollments,
+  selectIsEnrollmentModalOpen,
 } from "../../store/slices/enrollment.slice";
 import EnrollmentFormModal from "../forms/EnrollmentFormModal";
 
@@ -28,8 +31,9 @@ const AdminEnrollmentPage = () => {
 
   const [open, setOpen] = React.useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
-  // const [courseId, setCourseId] = useState<number | null>(null);
-  // const openModal = useSelector(selectIsCourseModalOpen);
+  const [enrollId, setEnrollId] = useState<number | null>(null);
+
+  const openModal = useSelector(selectIsEnrollmentModalOpen);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -53,39 +57,39 @@ const AdminEnrollmentPage = () => {
 
   const handleEdit = (id: number) => {
     console.log("id", id);
-    /* dispatch(fetchCourseById({ id: id.toString() })).then(() => {
+    dispatch(getEnrollment({ userId: id.toString() })).then(() => {
       dispatch({
-        type: "courses/openCourseModal",
+        type: "enrollments/openEnrollmentModal",
         payload: true,
       });
       dispatch({
-        type: "courses/isEdit",
+        type: "enrollments/isEdit",
         payload: true,
       });
-    }); */
+    });
   };
 
   const handleDelete = (id: number) => {
     console.log("id", id);
     setDeletePopup(true);
-    // setCourseId(id);
+    setEnrollId(id);
   };
 
   const handleClosePopup = () => {
     setDeletePopup(false);
-    // setCourseId(null);
+    setEnrollId(null);
   };
 
   const handleConfirm = async () => {
-    /* try {
-      if (courseId) {
-        dispatch(deleteCourse({ id: courseId.toString() }));
+    try {
+      if (enrollId) {
+        dispatch(deleteEnrollment({ id: enrollId.toString() }));
       }
     } catch (error) {
       console.error("API error:", error);
     } finally {
       handleClosePopup(); // Close the dialog after API call
-    } */
+    }
   };
 
   const handleClickOpen = () => {
@@ -95,18 +99,18 @@ const AdminEnrollmentPage = () => {
   const handleClose = () => {
     setOpen(false);
     dispatch({
-      type: "courses/openCourseModal",
+      type: "enrollments/openEnrollmentModal",
       payload: false,
     });
     dispatch({
-      type: "courses/isEdit",
+      type: "enrollments/isEdit",
       payload: false,
     });
   };
 
-  /* useEffect(() => {
+  useEffect(() => {
     setOpen(openModal);
-  }, [openModal]); */
+  }, [openModal]);
 
   const columns: GridColDef[] = [
     { field: "courseName", headerName: "Course name", width: 130 },
@@ -126,13 +130,16 @@ const AdminEnrollmentPage = () => {
     {
       field: "action",
       headerName: "Action",
-      width: 200,
+      width: 150,
       headerAlign: "right",
       renderCell: (params) => (
         <Box
           sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
         >
-          <IconButton color="primary" onClick={() => handleEdit(params.row.id)}>
+          <IconButton
+            color="primary"
+            onClick={() => handleEdit(params.row.userId)}
+          >
             <EditIcon />
           </IconButton>
           <IconButton color="error" onClick={() => handleDelete(params.row.id)}>

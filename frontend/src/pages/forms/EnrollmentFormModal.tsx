@@ -23,7 +23,11 @@ import {
   searchCourses,
   selectSearchedCourses,
 } from "../../store/slices/course.slice";
-import { createEnrollment } from "../../store/slices/enrollment.slice";
+import {
+  createEnrollment,
+  selectedEnrollment,
+  selectIsEnrollmentEdit,
+} from "../../store/slices/enrollment.slice";
 
 interface EnrollmentFormProps {
   open: boolean;
@@ -47,13 +51,14 @@ const validationSchema = Yup.object().shape({
 
 const EnrollmentFormModal = ({ open, handleClose }: EnrollmentFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const isEdit = useSelector(selectIsEnrollmentEdit);
+  const searchedUsers = useSelector(selectSearchedStudents);
+  const searchedCourses = useSelector(selectSearchedCourses);
+  const currentEnrollment = useSelector(selectedEnrollment);
 
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(
     null
   );
-
-  const searchedUsers = useSelector(selectSearchedStudents);
-  const searchedCourses = useSelector(selectSearchedCourses);
 
   const [searchStudentTerm, setSearchStudentTerm] = useState("");
   const [searchCoursetTerm, setSearchCoursetTerm] = useState("");
@@ -91,8 +96,20 @@ const EnrollmentFormModal = ({ open, handleClose }: EnrollmentFormProps) => {
   });
 
   useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
+    if (isEdit && currentEnrollment) {
+      // Edit mode: prefill the form
+      reset({
+        userId: currentEnrollment?.userId,
+        courseIds: currentEnrollment?.courseIds,
+      });
+    } else {
+      // Add mode: reset to default empty values
+      reset({
+        userId: undefined,
+        courseIds: [],
+      });
+    }
+  }, [isEdit, currentEnrollment, reset]);
 
   const onSubmit = async (data: EnrollmentFormData) => {
     try {
